@@ -1,0 +1,14 @@
+Instrucciones para Ejecución Local
+Desde la terminal en el directorio raíz del proyecto:
+
+Compilar todos los módulos:
+npm run build:all
+
+Iniciar Servidor de API (Puerto 3001):
+npm run dev:api
+
+Iniciar Servicio Monitor (Modo Consola):
+npm run start:monitor
+
+Iniciar Frontend React (Entorno de Desarrollo):
+npm run dev:frontend

@@ -1,0 +1,726 @@
+[
+  {
+    "nombre": "IDF - ALMACEN",
+    "unitId": 22
+  },
+  {
+    "nombre": "IDF - CONSTRUCCION",
+    "unitId": 22
+  },
+  {
+    "nombre": "IDF - CONTABILIDAD",
+    "unitId": 22
+  },
+  {
+    "nombre": "IDF - INFORMATICA",
+    "unitId": 22
+  },
+  {
+    "nombre": "IDF - JAC",
+    "unitId": 22
+  },
+  {
+    "nombre": "IDF - JURIDICO",
+    "unitId": 22
+  },
+  {
+    "nombre": "IDF - MEDICOS",
+    "unitId": 22
+  },
+  {
+    "nombre": "IDF - PERSONAL",
+    "unitId": 22
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 22
+  },
+  {
+    "nombre": "IDF - ARCHIVO",
+    "unitId": 23
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 23
+  },
+  {
+    "nombre": "IDF PERSONAL 2DO PISO RACK",
+    "unitId": 24
+  },
+  {
+    "nombre": "MDF CONMUTADOR 2DO PISO RACK",
+    "unitId": 24
+  },
+  {
+    "nombre": "IDF ARCHIVO 1ER PISO RACK",
+    "unitId": 25
+  },
+  {
+    "nombre": "IDF CENTRO DE SEGURIDAD SOCIAL",
+    "unitId": 26
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 26
+  },
+  {
+    "nombre": "IDF AFILIACION RACK",
+    "unitId": 28
+  },
+  {
+    "nombre": "IDF COBRANZA RACK",
+    "unitId": 28
+  },
+  {
+    "nombre": "IDF SUBDELEGACION RACK",
+    "unitId": 28
+  },
+  {
+    "nombre": "MDF RACK Y GABINETE",
+    "unitId": 28
+  },
+  {
+    "nombre": "IDF 2DO PISO GABINETE",
+    "unitId": 29
+  },
+  {
+    "nombre": "IDF 4TO PISO GABINETE",
+    "unitId": 29
+  },
+  {
+    "nombre": "IDF ADMISION GINECO",
+    "unitId": 29
+  },
+  {
+    "nombre": "IDF CONMUTADOR RACK Y GABINETE",
+    "unitId": 29
+  },
+  {
+    "nombre": "IDF CONSULTA ANEXOS",
+    "unitId": 29
+  },
+  {
+    "nombre": "IDF CONSULTA RACK",
+    "unitId": 29
+  },
+  {
+    "nombre": "IDF FARMACIA RACK",
+    "unitId": 29
+  },
+  {
+    "nombre": "IDF SALUD EN EL TRABAJO ANEXOS",
+    "unitId": 29
+  },
+  {
+    "nombre": "MDF DIRECCION",
+    "unitId": 32
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 35
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 36
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 37
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 38
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 39
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 40
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 41
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 43
+  },
+  {
+    "nombre": "MDF ARCHIVO 1ER PISO RACK",
+    "unitId": 44
+  },
+  {
+    "nombre": "IDF RAYOS X RACK",
+    "unitId": 45
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 45
+  },
+  {
+    "nombre": "MDF FARMACIA 1ER PISO RACK",
+    "unitId": 47
+  },
+  {
+    "nombre": "IDF - ALMACEN",
+    "unitId": 48
+  },
+  {
+    "nombre": "IDF - CONSULTA",
+    "unitId": 48
+  },
+  {
+    "nombre": "IDF - DIRECCION",
+    "unitId": 48
+  },
+  {
+    "nombre": "IDF - URGENCIAS",
+    "unitId": 48
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 48
+  },
+  {
+    "nombre": "MDF RACK Y GABINETE",
+    "unitId": 49
+  },
+  {
+    "nombre": "MDF FARMACIA 1ER PISO RACK",
+    "unitId": 50
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 51
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 52
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 53
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 54
+  },
+  {
+    "nombre": "IDF CUERPO DE GOBIERNO",
+    "unitId": 55
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 55
+  },
+  {
+    "nombre": "IDF PERSONAL",
+    "unitId": 56
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 56
+  },
+  {
+    "nombre": "IDF CONSULTA",
+    "unitId": 57
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 57
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 58
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 59
+  },
+  {
+    "nombre": "IDF - SECUNDARIO",
+    "unitId": 60
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 60
+  },
+  {
+    "nombre": "IDF GABINETE",
+    "unitId": 64
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 64
+  },
+  {
+    "nombre": "IDF CUERPO DE GOBIERNO RACK",
+    "unitId": 69
+  },
+  {
+    "nombre": "IDF IMAGENOLOGIA RACK",
+    "unitId": 69
+  },
+  {
+    "nombre": "IDF LABORATORIO RACK",
+    "unitId": 69
+  },
+  {
+    "nombre": "IDF ONCO-CREA RACK",
+    "unitId": 69
+  },
+  {
+    "nombre": "IDF URGENCIAS RACK",
+    "unitId": 69
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 69
+  },
+  {
+    "nombre": "IDF - PASILLO",
+    "unitId": 71
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 71
+  },
+  {
+    "nombre": "IDF CONSULTORIO ANESTESIA 1ER PISO GABINETE",
+    "unitId": 72
+  },
+  {
+    "nombre": "IDF EPIDEMIOLOGIA EDIFICIO ANEXO GABINETE",
+    "unitId": 72
+  },
+  {
+    "nombre": "IDF REHABILITACION EDIFICIO ANEXO GABINETE",
+    "unitId": 72
+  },
+  {
+    "nombre": "IDF SOTANO ARCHIVO GABINETE",
+    "unitId": 72
+  },
+  {
+    "nombre": "IDF URGENCIAS ER PISO RACK",
+    "unitId": 72
+  },
+  {
+    "nombre": "MDF SOTANO PISO HOSPITAL RACK",
+    "unitId": 72
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 73
+  },
+  {
+    "nombre": "IDF ARCHIVO RACK",
+    "unitId": 74
+  },
+  {
+    "nombre": "IDF CONSULTA RACK",
+    "unitId": 74
+  },
+  {
+    "nombre": "IDF HOSPITALIZACION RACK",
+    "unitId": 74
+  },
+  {
+    "nombre": "IDF IMAGENOLOGIA RACK",
+    "unitId": 74
+  },
+  {
+    "nombre": "IDF LABORATORIO",
+    "unitId": 74
+  },
+  {
+    "nombre": "IDF PERSONAL GABINETE",
+    "unitId": 74
+  },
+  {
+    "nombre": "IDF RADIOTERAPIA II RACK",
+    "unitId": 74
+  },
+  {
+    "nombre": "IDF RADIOTERAPIA RACK",
+    "unitId": 74
+  },
+  {
+    "nombre": "IDF URGENCIAS RACK",
+    "unitId": 74
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 74
+  },
+  {
+    "nombre": "IDF - 1ER PISO",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - 2DO PISO",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - 3ER PISO",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - ANEXO",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - BANCO SANGRE",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - FARMACIA",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - GOBIERNO",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - HEMODIALISIS",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - LABORATORIO",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - PLANTA BAJA",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - RX",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - TORRE 2DO",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - TORRE SOTANO",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - UCI",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - URGENCIAS",
+    "unitId": 75
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 75
+  },
+  {
+    "nombre": "IDF - 1ER PISO",
+    "unitId": 76
+  },
+  {
+    "nombre": "IDF - 3ER PISO",
+    "unitId": 76
+  },
+  {
+    "nombre": "IDF - AULA",
+    "unitId": 76
+  },
+  {
+    "nombre": "IDF - PLANTA BAJA",
+    "unitId": 76
+  },
+  {
+    "nombre": "IDF - URGENCIAS",
+    "unitId": 76
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 76
+  },
+  {
+    "nombre": "IDF - CONSULTA",
+    "unitId": 77
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 77
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 78
+  },
+  {
+    "nombre": "MDF PRESTACIONES ECONOMICAS 1ER PISO RACK GABINETE",
+    "unitId": 79
+  },
+  {
+    "nombre": "IDF ALMACEN",
+    "unitId": 80
+  },
+  {
+    "nombre": "IDF PRIMER PISO CONSULTA",
+    "unitId": 80
+  },
+  {
+    "nombre": "IDF SEGUNDO PISO CONSULTA",
+    "unitId": 80
+  },
+  {
+    "nombre": "IDF URGENCIAS",
+    "unitId": 80
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 80
+  },
+  {
+    "nombre": "IDF - ARCHIVO",
+    "unitId": 81
+  },
+  {
+    "nombre": "IDF - FARMACIA",
+    "unitId": 81
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 81
+  },
+  {
+    "nombre": "IDF ALMACEN GABINETE",
+    "unitId": 82
+  },
+  {
+    "nombre": "IDF CONSULTA RACK",
+    "unitId": 82
+  },
+  {
+    "nombre": "IDF FARMACIA GABINETE",
+    "unitId": 82
+  },
+  {
+    "nombre": "IDF IMAGENOLOGIA RACK",
+    "unitId": 82
+  },
+  {
+    "nombre": "IDF LABORATORIO GABINETE",
+    "unitId": 82
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 82
+  },
+  {
+    "nombre": "IDF CENTRO DE CAPACITACION",
+    "unitId": 2497
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 2497
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 2714
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 2930
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 2932
+  },
+  {
+    "nombre": "IDF - PASILLO",
+    "unitId": 70128
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 70128
+  },
+  {
+    "nombre": "IDF - CONSULTORIOS",
+    "unitId": 70129
+  },
+  {
+    "nombre": "IDF - RACK",
+    "unitId": 70129
+  },
+  {
+    "nombre": "MDF - INFORMATICA",
+    "unitId": 70129
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 70159
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 70160
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 70175
+  },
+  {
+    "nombre": "MDF RACK Y GABINETE",
+    "unitId": 70176
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 70177
+  },
+  {
+    "nombre": "IDF CONSULTA GABINETE",
+    "unitId": 70179
+  },
+  {
+    "nombre": "IDF OFICINA AUXILIAR ROSARITO RACK",
+    "unitId": 70179
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 70179
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 70302
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 70304
+  },
+  {
+    "nombre": "IDF - PLANTA BAJA",
+    "unitId": 70340
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 70340
+  },
+  {
+    "nombre": "IDF CLOSET CONSULTA",
+    "unitId": 70507
+  },
+  {
+    "nombre": "MDF RACK Y GABINETE",
+    "unitId": 70507
+  },
+  {
+    "nombre": "IDF - 1ER PISO",
+    "unitId": 70508
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 70508
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 70657
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 70700
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 70836
+  },
+  {
+    "nombre": "IDF RACK",
+    "unitId": 70921
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 70921
+  },
+  {
+    "nombre": "IDF PASILLO RACK",
+    "unitId": 70923
+  },
+  {
+    "nombre": "MDF RACK",
+    "unitId": 70923
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 70945
+  },
+  {
+    "nombre": "IDF JEF ENFERMERIA",
+    "unitId": 71070
+  },
+  {
+    "nombre": "IDF MODULO 1",
+    "unitId": 71070
+  },
+  {
+    "nombre": "IDF MODULO 2",
+    "unitId": 71070
+  },
+  {
+    "nombre": "IDF TRABAJO SOCIAL",
+    "unitId": 71070
+  },
+  {
+    "nombre": "MDF PASILLO",
+    "unitId": 71070
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 71389
+  },
+  {
+    "nombre": "IDF 1 GOBIERNO",
+    "unitId": 71498
+  },
+  {
+    "nombre": "IDF 2 CONSULTA TRAUMA",
+    "unitId": 71498
+  },
+  {
+    "nombre": "IDF 3 CONSULTA MEDICINA INTERNA",
+    "unitId": 71498
+  },
+  {
+    "nombre": "IDF 4 HEMODIALISIS",
+    "unitId": 71498
+  },
+  {
+    "nombre": "IDF 5 PUESTO SANGRADO",
+    "unitId": 71498
+  },
+  {
+    "nombre": "IDF 6 FINANZAS",
+    "unitId": 71498
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 71498
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 71594
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 71595
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 71616
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 71617
+  },
+  {
+    "nombre": "MDF",
+    "unitId": 71618
+  }
+]

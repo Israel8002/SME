@@ -1,0 +1,548 @@
+[
+  {
+    "id": 1,
+    "nombre": "SONDA MONITOR",
+    "cityId": "MXL",
+    "tipo": "Oficinas",
+    "activo": true
+  },
+  {
+    "id": 22,
+    "nombre": "OOADBC",
+    "cityId": "MXL",
+    "tipo": "Oficinas",
+    "activo": true
+  },
+  {
+    "id": 23,
+    "nombre": "SUBDELEG MXL",
+    "cityId": "MXL",
+    "tipo": "Subdelegación",
+    "activo": true
+  },
+  {
+    "id": 24,
+    "nombre": "SUBDELEG ENS",
+    "cityId": "ENS",
+    "tipo": "Subdelegación",
+    "activo": true
+  },
+  {
+    "id": 25,
+    "nombre": "UMF 32 ENS",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 26,
+    "nombre": "SUBDELEG SLRC",
+    "cityId": "SLRC",
+    "tipo": "Subdelegación",
+    "activo": true
+  },
+  {
+    "id": 28,
+    "nombre": "SUBDELEG TIJ",
+    "cityId": "TIJ",
+    "tipo": "Subdelegación",
+    "activo": true
+  },
+  {
+    "id": 29,
+    "nombre": "HGO-MF 7 TIJ",
+    "cityId": "TIJ",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 32,
+    "nombre": "CENTRO SEG SOC TIJ",
+    "cityId": "TIJ",
+    "tipo": "Centro de Seguridad Social",
+    "activo": true
+  },
+  {
+    "id": 35,
+    "nombre": "ALMACEN AZUCARERA",
+    "cityId": "MXL",
+    "tipo": "Almacén",
+    "activo": true
+  },
+  {
+    "id": 36,
+    "nombre": "PERIFERICO CFE ROSARITO",
+    "cityId": "TIJ",
+    "tipo": "Oficinas",
+    "activo": true
+  },
+  {
+    "id": 37,
+    "nombre": "UMF 2 POB BENITO JUAREZ",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 38,
+    "nombre": "UMF 3 CD MORELOS",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 39,
+    "nombre": "UMF 4 EJ DURANGO",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 40,
+    "nombre": "UMF 5 EJ NUEVO LEON",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 41,
+    "nombre": "UMF 9 LUIS B SANCHEZ",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 43,
+    "nombre": "UMF 10 GUADALUPE VICTORIA",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 44,
+    "nombre": "UMF 11 EL SAUZAL",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 45,
+    "nombre": "UMF 13 SAN QUINTIN",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 47,
+    "nombre": "UMF 14 V GUADALUPE",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 48,
+    "nombre": "HGS-MF 12 SLRC",
+    "cityId": "SLRC",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 49,
+    "nombre": "UMF 19 TIJ CENTRO",
+    "cityId": "TIJ",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 50,
+    "nombre": "UMF 22 SAN VICENTE",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 51,
+    "nombre": "UMF 24 SAN FELIPE",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 52,
+    "nombre": "OFNA AUX SAN FELIPE",
+    "cityId": "MXL",
+    "tipo": "Oficinas",
+    "activo": true
+  },
+  {
+    "id": 53,
+    "nombre": "UMF 26 MXL",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 54,
+    "nombre": "UMF 29 EL ROSARIO",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 55,
+    "nombre": "UMF 34 EL FLORIDO",
+    "cityId": "TIJ",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 56,
+    "nombre": "UMF 35 LOBOS",
+    "cityId": "TIJ",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 57,
+    "nombre": "UMF 36 MESA DE OTAY",
+    "cityId": "TIJ",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 58,
+    "nombre": "SUBSEDE DELEGACIONAL",
+    "cityId": "TIJ",
+    "tipo": "Oficinas",
+    "activo": true
+  },
+  {
+    "id": 59,
+    "nombre": "UMF 37 PALMAR SANTA ANITA",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 60,
+    "nombre": "ALMACEN DELEGACIONAL BCN",
+    "cityId": "MXL",
+    "tipo": "Almacén",
+    "activo": true
+  },
+  {
+    "id": 64,
+    "nombre": "CENTRO SEGURIDAD SOCIAL MXL",
+    "cityId": "MXL",
+    "tipo": "Centro de Seguridad Social",
+    "activo": true
+  },
+  {
+    "id": 69,
+    "nombre": "HGR 1 TIJ",
+    "cityId": "TIJ",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 71,
+    "nombre": "SUBDELEG TKT",
+    "cityId": "TKT",
+    "tipo": "Subdelegación",
+    "activo": true
+  },
+  {
+    "id": 72,
+    "nombre": "HGZ-MF 8 ENS",
+    "cityId": "ENS",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 73,
+    "nombre": "UMF NO 15 EJ HERMOSILLO",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 74,
+    "nombre": "HGR 20 TIJ",
+    "cityId": "TIJ",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 75,
+    "nombre": "HGE 30 MXL",
+    "cityId": "MXL",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 76,
+    "nombre": "HGP-MF 31 MXL",
+    "cityId": "MXL",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 77,
+    "nombre": "UMF 16 MXL",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 78,
+    "nombre": "UMF 17 ROSARITO",
+    "cityId": "TIJ",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 79,
+    "nombre": "UMF 25 ENS",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 80,
+    "nombre": "UMF 27 TIJ",
+    "cityId": "TIJ",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 81,
+    "nombre": "UMF 28 MXL",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 82,
+    "nombre": "UMF 33 TIJ",
+    "cityId": "TIJ",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 2497,
+    "nombre": "CENTRO CAPA TIJ",
+    "cityId": "TIJ",
+    "tipo": "Centro CAPA",
+    "activo": true
+  },
+  {
+    "id": 2714,
+    "nombre": "HRS 69 SAN QUINTIN",
+    "cityId": "ENS",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 2930,
+    "nombre": "TIENDA IMSS ENS",
+    "cityId": "ENS",
+    "tipo": "Tienda",
+    "activo": true
+  },
+  {
+    "id": 2932,
+    "nombre": "TIENDA IMSS TIJ",
+    "cityId": "TIJ",
+    "tipo": "Tienda",
+    "activo": true
+  },
+  {
+    "id": 70128,
+    "nombre": "UMF 38 SLRC",
+    "cityId": "SLRC",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 70129,
+    "nombre": "UMF 39 TKT",
+    "cityId": "TKT",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 70159,
+    "nombre": "GUARDERIA MXL",
+    "cityId": "MXL",
+    "tipo": "Guardería",
+    "activo": true
+  },
+  {
+    "id": 70160,
+    "nombre": "GUARDERIA ENS",
+    "cityId": "ENS",
+    "tipo": "Guardería",
+    "activo": true
+  },
+  {
+    "id": 70175,
+    "nombre": "TEATRO IMSS TIJUANA",
+    "cityId": "TIJ",
+    "tipo": "Teatro",
+    "activo": true
+  },
+  {
+    "id": 70176,
+    "nombre": "PERIFERICO SONY",
+    "cityId": "TIJ",
+    "tipo": "Periférico",
+    "activo": true
+  },
+  {
+    "id": 70177,
+    "nombre": "BODEGA IMSS TIJUANA",
+    "cityId": "TIJ",
+    "tipo": "Bodega",
+    "activo": true
+  },
+  {
+    "id": 70179,
+    "nombre": "PERIFERICO SHARP",
+    "cityId": "TIJ",
+    "tipo": "Periférico",
+    "activo": true
+  },
+  {
+    "id": 70302,
+    "nombre": "GUARDERIA TIJ",
+    "cityId": "TIJ",
+    "tipo": "Guardería",
+    "activo": true
+  },
+  {
+    "id": 70304,
+    "nombre": "ESC DE ENFERMERIA",
+    "cityId": "TIJ",
+    "tipo": "Escuela",
+    "activo": true
+  },
+  {
+    "id": 70340,
+    "nombre": "HGS 6 TKT",
+    "cityId": "TKT",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 70507,
+    "nombre": "UMF 18 TIJ",
+    "cityId": "TIJ",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 70508,
+    "nombre": "UMF 40 MXL",
+    "cityId": "MXL",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 70657,
+    "nombre": "CENTRO CAPA MXL",
+    "cityId": "MXL",
+    "tipo": "Centro CAPA",
+    "activo": true
+  },
+  {
+    "id": 70700,
+    "nombre": "PERIFERICO HIPODROMO",
+    "cityId": "TIJ",
+    "tipo": "Periférico",
+    "activo": true
+  },
+  {
+    "id": 70836,
+    "nombre": "PERIFERICO TELNOR",
+    "cityId": "TIJ",
+    "tipo": "Periférico",
+    "activo": true
+  },
+  {
+    "id": 70921,
+    "nombre": "UDDCM",
+    "cityId": "TIJ",
+    "tipo": "Unidad",
+    "activo": true
+  },
+  {
+    "id": 70923,
+    "nombre": "UMF 21 ROSARITO",
+    "cityId": "TIJ",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 70945,
+    "nombre": "PARQUE IMSS",
+    "cityId": "MXL",
+    "tipo": "Parque",
+    "activo": true
+  },
+  {
+    "id": 71070,
+    "nombre": "HOSPITAL COVID TIJUANA",
+    "cityId": "TIJ",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 71389,
+    "nombre": "CENTRO DE MEZCLAS UMAA 36",
+    "cityId": "TIJ",
+    "tipo": "Centro de Mezclas",
+    "activo": true
+  },
+  {
+    "id": 71498,
+    "nombre": "HOSPITAL GENERAL REGIONAL 23",
+    "cityId": "ENS",
+    "tipo": "Hospital",
+    "activo": true
+  },
+  {
+    "id": 71594,
+    "nombre": "UMR CAMALÚ",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 71595,
+    "nombre": "UMR LÁZARO CÁRDENAS (SAN QUINTIN)",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 71616,
+    "nombre": "UMR EJIDO PUNTA COLONET",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": false
+  },
+  {
+    "id": 71617,
+    "nombre": "UMR SANTO TOMAS",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": true
+  },
+  {
+    "id": 71618,
+    "nombre": "UMR EJIDO VILLA DE JESUS MARIA",
+    "cityId": "ENS",
+    "tipo": "UMF",
+    "activo": false
+  }
+]

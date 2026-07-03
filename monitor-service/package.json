@@ -1,0 +1,17 @@
+{
+  "name": "monitor-service",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/monitor.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/monitor.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  }
+}

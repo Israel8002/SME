@@ -1,0 +1,22 @@
+[
+  {
+    "id": "MXL",
+    "nombre": "Mexicali"
+  },
+  {
+    "id": "ENS",
+    "nombre": "Ensenada"
+  },
+  {
+    "id": "TIJ",
+    "nombre": "Tijuana"
+  },
+  {
+    "id": "SLRC",
+    "nombre": "San Luis Río Colorado"
+  },
+  {
+    "id": "TKT",
+    "nombre": "Tecate"
+  }
+]

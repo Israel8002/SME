@@ -1,0 +1,3548 @@
+SISTEMA DE MONITOREO DE ENLACES (SME)
+
+Especificación Técnica Oficial
+
+Versión 1.0
+
+Autor:
+LSC Israel Díaz Serrano
+
+Fecha:
+Julio 2026
+
+====================================================
+
+Tecnologías
+
+Frontend
+React
+TypeScript
+Vite
+TailwindCSS
+PWA
+
+Backend
+Node.js
+Express
+
+Servicio Monitor
+Node.js Windows Service
+
+Base de Datos
+SQLite
+
+Arquitectura
+
+Clean Architecture
+
+SOLID
+
+Repository Pattern
+
+Service Pattern
+
+Objetivo
+
+Desarrollar una plataforma profesional de monitoreo automático de enlaces institucionales, completamente local, capaz de detectar caídas, generar tickets automáticos, almacenar historial, generar reportes y operar de forma continua las 24 horas del día.
+
+====================================================
+
+Quiero que actúes como un Software Architect, Senior Full Stack Developer, Senior UI/UX Designer, Database Architect, Network Engineer, QA Engineer y DevOps Engineer con más de 20 años de experiencia.
+
+No desarrolles código inmediatamente.
+
+Primero analiza completamente el proyecto.
+
+Si encuentras una mejor solución técnica deberás proponerla antes de implementarla.
+
+Nunca elimines funcionalidades sin justificarlo.
+
+Todo el proyecto deberá seguir los principios:
+
+• Clean Architecture
+• SOLID
+• KISS
+• DRY
+• Código modular
+• Código reutilizable
+• Alta escalabilidad
+• Alta mantenibilidad
+
+El sistema se llamará:
+
+"Sistema de Monitoreo de Enlaces (SME)"
+
+OBJETIVO
+
+Desarrollar una aplicación profesional para monitorear automáticamente la disponibilidad de enlaces de red pertenecientes a unidades institucionales.
+
+El sistema deberá funcionar completamente de forma automática.
+
+El usuario nunca iniciará un monitoreo.
+
+El sistema deberá monitorear permanentemente todas las unidades registradas.
+
+Cuando una unidad presente una falla confirmada, el sistema deberá generar automáticamente un ticket.
+
+Cuando el enlace se recupere, el sistema deberá cerrar automáticamente el ticket.
+
+Toda la información deberá almacenarse localmente.
+
+El sistema deberá funcionar aunque no exista conexión a Internet.
+
+No utilizar servicios Cloud.
+
+No utilizar Firebase.
+
+No utilizar Supabase.
+
+No utilizar MongoDB.
+
+No utilizar APIs externas.
+
+No utilizar servicios de monitoreo de terceros.
+
+Toda la lógica deberá ejecutarse localmente.
+
+El monitoreo deberá funcionar las 24 horas del día.
+
+La aplicación será una PWA instalable.
+
+El sistema deberá continuar monitoreando aunque ningún usuario tenga abierta la interfaz.
+
+El proyecto deberá estar preparado para crecer durante muchos años sin requerir cambios importantes en su arquitectura.
+
+Antes de comenzar a desarrollar deberás analizar toda la arquitectura y proponer cualquier mejora que consideres necesaria.
+
+Diseña la arquitectura completa del sistema siguiendo una estructura modular, desacoplada y preparada para producción.
+
+## TECNOLOGÍAS OBLIGATORIAS
+
+Frontend
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- PWA (Progressive Web App)
+
+Backend
+
+- Node.js
+- Express
+- API REST
+
+Servicio Monitor
+
+- Node.js
+- Proceso independiente del Backend
+- Debe ejecutarse permanentemente como Servicio de Windows.
+- Debe iniciar automáticamente cuando inicie el sistema operativo.
+- Debe seguir funcionando aunque ningún usuario tenga abierta la aplicación.
+
+Base de Datos
+
+- SQLite
+- Base de datos completamente local.
+- Sin conexión a Internet.
+- Sin sincronización Cloud.
+- Toda la información deberá almacenarse en un único archivo SQLite.
+
+Exportaciones
+
+- PDF
+- Excel (.xlsx)
+
+Importaciones
+
+- JSON
+
+Respaldos
+
+- Manuales
+- Automáticos
+
+## ESTRUCTURA DEL PROYECTO
+
+El proyecto deberá dividirse como mínimo en:
+
+SME/
+
+├── frontend/
+│
+├── backend-api/
+│
+├── monitor-service/
+│
+├── shared/
+│
+├── database/
+│
+├── backups/
+│
+├── exports/
+│
+├── imports/
+│
+├── logs/
+│
+└── documentation/
+
+Cada módulo deberá tener responsabilidades completamente independientes.
+
+El frontend nunca deberá realizar monitoreo.
+
+El frontend únicamente consumirá información mediante la API.
+
+La API nunca deberá realizar pings.
+
+La API únicamente administrará la base de datos y expondrá servicios REST.
+
+El Servicio Monitor será el único responsable de:
+
+- Leer las IPs.
+- Ejecutar pings.
+- Detectar caídas.
+- Abrir tickets.
+- Cerrar tickets.
+- Actualizar estados.
+- Registrar eventos.
+- Escribir resultados en SQLite.
+
+## COMUNICACIÓN
+
+Frontend
+↓
+
+API REST
+
+↓
+
+SQLite
+
+↑
+
+Servicio Monitor
+
+El Servicio Monitor y la API compartirán únicamente la base de datos SQLite.
+
+No deberán depender uno del otro para funcionar.
+
+Si la interfaz está cerrada, el monitor deberá seguir trabajando.
+
+Si la API deja de ejecutarse, el monitor deberá continuar monitoreando.
+
+## FILOSOFÍA
+
+Separar completamente:
+
+Interfaz
+
+Lógica de negocio
+
+Motor de monitoreo
+
+Persistencia de datos
+
+Importaciones
+
+Exportaciones
+
+Respaldos
+
+Logs
+
+Cada componente deberá poder evolucionar sin afectar a los demás.
+
+## REQUISITOS
+
+Toda la arquitectura deberá estar preparada para:
+
+- Agregar nuevos módulos.
+- Agregar nuevos tipos de monitoreo.
+- Agregar nuevos reportes.
+- Agregar nuevas importaciones.
+- Agregar nuevas exportaciones.
+
+Sin modificar la arquitectura principal.
+
+Todo deberá estar preparado para producción desde el primer día.
+
+Antes de escribir cualquier línea de código, genera un documento de arquitectura describiendo cada componente, sus responsabilidades y la comunicación entre ellos.
+
+Quiero una interfaz moderna, elegante, minimalista y completamente profesional.
+
+La aplicación será utilizada diariamente por personal de Telecomunicaciones, por lo que debe transmitir seriedad, rapidez y facilidad de uso.
+
+NO diseñes una interfaz con apariencia de sistema gubernamental antiguo.
+
+NO utilices interfaces infantiles.
+
+NO utilices diseños sobrecargados.
+
+## ESTILO GENERAL
+
+Inspirarse en software profesional de monitoreo de infraestructura y centros de operaciones (NOC).
+
+La interfaz deberá sentirse como una herramienta empresarial premium.
+
+Toda la aplicación deberá mantener el mismo lenguaje visual.
+
+## TEMA
+
+Únicamente modo oscuro.
+
+No implementar modo claro.
+
+## PALETA DE COLORES
+
+Fondo principal:
+Negro o gris extremadamente oscuro.
+
+Paneles:
+Gris oscuro ligeramente diferente al fondo.
+
+Texto principal:
+Blanco.
+
+Texto secundario:
+Gris claro.
+
+Separadores:
+Gris muy oscuro.
+
+Colores de estado:
+
+Verde:
+Solo para indicar que una unidad está operativa.
+
+Rojo:
+Solo para indicar una falla o ticket activo.
+
+Amarillo:
+Solo para advertencias.
+
+Azul:
+Solo para botones, enlaces y acciones del usuario.
+
+No utilizar colores innecesarios.
+
+## PROHIBIDO
+
+No usar gradientes.
+
+No usar Glassmorphism.
+
+No usar Neumorphism.
+
+No usar fondos con imágenes.
+
+No usar transparencias exageradas.
+
+No usar sombras llamativas.
+
+No usar efectos de brillo.
+
+No usar animaciones innecesarias.
+
+No usar tarjetas gigantes.
+
+No usar exceso de iconos.
+
+No usar emojis.
+
+## TIPOGRAFÍA
+
+Utilizar una tipografía moderna.
+
+Priorizar legibilidad.
+
+Mantener tamaños consistentes.
+
+Los números deberán ser fáciles de leer para visualizar tiempos de caída.
+
+## NAVEGACIÓN
+
+Implementar un menú lateral colapsable.
+
+Secciones:
+
+Dashboard
+
+Unidades
+
+Tickets
+
+Reportes
+
+Importaciones
+
+Respaldos
+
+Configuración
+
+Logs
+
+Acerca del sistema
+
+El menú deberá permanecer fijo.
+
+El contenido cambiará únicamente en el panel principal.
+
+## DASHBOARD
+
+El Dashboard deberá mostrar indicadores discretos.
+
+No utilizar gráficas exageradas.
+
+Mostrar:
+
+Total de unidades.
+
+Unidades en línea.
+
+Unidades con falla.
+
+Tickets abiertos.
+
+Tickets cerrados hoy.
+
+Disponibilidad general.
+
+Debajo mostrar una tabla profesional con todas las unidades.
+
+Columnas:
+
+Estado
+
+Unidad
+
+Ciudad
+
+Tipo
+
+Tiempo de caída
+
+Ticket activo
+
+Última recuperación
+
+Permitir:
+
+Ordenar columnas.
+
+Buscar.
+
+Filtrar.
+
+Paginación.
+
+Actualización automática sin recargar la página.
+
+## PANTALLA DE UNIDAD
+
+Cada unidad deberá tener una vista de detalle.
+
+Mostrar:
+
+Información general.
+
+Lista de IPs.
+
+Estado actual.
+
+Ticket activo.
+
+Historial.
+
+Estadísticas.
+
+No saturar la pantalla.
+
+Organizar la información mediante pestañas.
+
+## FORMULARIOS
+
+Todos los formularios deberán ser limpios.
+
+Campos bien alineados.
+
+Validaciones en tiempo real.
+
+Mensajes claros.
+
+Botones discretos.
+
+## TABLAS
+
+Las tablas deberán ser el elemento principal de la aplicación.
+
+Características:
+
+Ordenamiento.
+
+Filtros.
+
+Búsqueda instantánea.
+
+Cambio de tamaño de columnas.
+
+Paginación.
+
+Exportación.
+
+Seleccionar registros.
+
+## EXPERIENCIA DE USUARIO
+
+La aplicación deberá poder utilizarse durante muchas horas sin cansar la vista.
+
+Reducir el uso de colores.
+
+Reducir elementos visuales innecesarios.
+
+Dar prioridad absoluta a la información.
+
+Toda acción importante deberá solicitar confirmación antes de ejecutarse.
+
+## RESPONSIVE
+
+La aplicación deberá funcionar correctamente en:
+
+Monitores Full HD.
+
+Monitores 2K.
+
+Monitores 4K.
+
+Laptops.
+
+Tablets.
+
+Teléfonos móviles.
+
+Como PWA deberá comportarse como una aplicación nativa.
+
+## CONSISTENCIA
+
+Todos los módulos deberán compartir:
+
+La misma paleta.
+
+La misma tipografía.
+
+Los mismos botones.
+
+Los mismos formularios.
+
+Las mismas tablas.
+
+Los mismos espacios.
+
+Las mismas reglas visuales.
+
+El objetivo es que cualquier usuario identifique inmediatamente que todas las pantallas pertenecen al mismo sistema.
+
+Diseña una base de datos SQLite completamente normalizada, optimizada y preparada para producción.
+
+Toda la información deberá almacenarse localmente.
+
+No utilizar bases de datos externas.
+
+No utilizar servicios Cloud.
+
+La base de datos deberá estar preparada para almacenar muchos años de información sin necesidad de rediseñar su estructura.
+
+Aplicar buenas prácticas de modelado relacional.
+
+Crear índices donde sean necesarios para mejorar el rendimiento.
+
+Nunca almacenar información duplicada.
+
+Todas las relaciones deberán implementarse mediante claves foráneas.
+
+------------------------------------
+TABLAS PRINCIPALES
+------------------------------------
+
+1. cities
+
+Información de las ciudades.
+
+Campos:
+
+id
+nombre
+
+El catálogo será importado desde JSON.
+
+No podrá modificarse manualmente.
+
+------------------------------------
+
+2. units
+
+Catálogo oficial de unidades.
+
+Campos:
+
+id (ID oficial IMSS)
+
+nombre
+
+cityId
+
+tipo
+
+activo
+
+fechaImportacion
+
+ultimaActualizacion
+
+El catálogo será importado desde JSON.
+
+No podrá editarse manualmente excepto observaciones locales si posteriormente se agregan.
+
+------------------------------------
+
+3. rooms
+
+Catálogo oficial de cuartos.
+
+Campos:
+
+id
+
+unitId
+
+nombre
+
+fechaImportacion
+
+ultimaActualizacion
+
+También será importado desde JSON.
+
+------------------------------------
+
+4. unit_ips
+
+Esta tabla almacenará las IP configuradas para cada unidad.
+
+Campos:
+
+id
+
+unitId
+
+direccionIP
+
+descripcion
+
+esCritica
+
+activa
+
+timeout
+
+intervaloPing
+
+fechaAlta
+
+ultimaModificacion
+
+Una unidad podrá tener una cantidad ilimitada de IPs.
+
+No almacenar las IP dentro del JSON.
+
+Las IP pertenecen únicamente a SQLite.
+
+------------------------------------
+
+5. tickets
+
+Tickets automáticos generados por el monitor.
+
+Campos:
+
+id
+
+folio
+
+unitId
+
+fechaInicio
+
+fechaFin
+
+duracionSegundos
+
+estado
+
+motivo
+
+observaciones
+
+creadoAutomaticamente
+
+Cada ticket permanecerá almacenado permanentemente.
+
+Nunca eliminar historial.
+
+------------------------------------
+
+6. ticket_details
+
+Detalle del ticket.
+
+Campos:
+
+id
+
+ticketId
+
+ipId
+
+descripcion
+
+estadoInicial
+
+estadoFinal
+
+Permite registrar qué IP crítica ocasionó el ticket.
+
+------------------------------------
+
+7. ping_history
+
+Historial completo de monitoreo.
+
+Campos:
+
+id
+
+ipId
+
+fechaHora
+
+resultado
+
+latencia
+
+mensajeError
+
+Guardar todos los resultados de monitoreo.
+
+Preparar el sistema para poder eliminar automáticamente registros muy antiguos mediante configuración.
+
+------------------------------------
+
+8. monitor_status
+
+Estado actual del monitor.
+
+Campos:
+
+id
+
+ultimaEjecucion
+
+inicioServicio
+
+estado
+
+version
+
+memoria
+
+cpu
+
+ultimaActualizacion
+
+Permitirá mostrar que el monitor sigue funcionando correctamente.
+
+------------------------------------
+
+9. settings
+
+Configuraciones generales.
+
+Campos:
+
+id
+
+intervaloPing
+
+fallosConsecutivos
+
+recuperacionesConsecutivas
+
+timeout
+
+rutaRespaldos
+
+rutaExportaciones
+
+nombreInstitucion
+
+logo
+
+actualizacionAutomatica
+
+Todos los parámetros deberán poder modificarse desde la aplicación.
+
+Nunca modificar archivos manualmente.
+
+------------------------------------
+
+10. imports
+
+Historial de importaciones.
+
+Campos:
+
+id
+
+tipoArchivo
+
+fecha
+
+hora
+
+usuario
+
+registrosImportados
+
+errores
+
+duracion
+
+resultado
+
+archivoOriginal
+
+------------------------------------
+
+11. backups
+
+Historial de respaldos.
+
+Campos:
+
+id
+
+fecha
+
+hora
+
+ruta
+
+tamano
+
+automatico
+
+usuario
+
+resultado
+
+------------------------------------
+
+12. exports
+
+Historial de exportaciones.
+
+Campos:
+
+id
+
+tipo
+
+fecha
+
+hora
+
+usuario
+
+ruta
+
+resultado
+
+------------------------------------
+
+13. logs
+
+Bitácora general del sistema.
+
+Campos:
+
+id
+
+fechaHora
+
+nivel
+
+modulo
+
+evento
+
+descripcion
+
+usuario
+
+ipEquipo
+
+Toda acción importante deberá registrarse automáticamente.
+
+------------------------------------
+RELACIONES
+------------------------------------
+
+City
+
+↓
+
+Unit
+
+↓
+
+Room
+
+↓
+
+Unit_IP
+
+↓
+
+Ping_History
+
+Unit
+
+↓
+
+Ticket
+
+↓
+
+Ticket_Detail
+
+------------------------------------
+REGLAS
+
+Nunca eliminar registros históricos.
+
+Utilizar eliminación lógica cuando corresponda.
+
+Crear índices para:
+
+UnitID
+
+CityID
+
+Fecha
+
+Estado
+
+Ticket
+
+IP
+
+Todas las consultas deberán optimizarse para mantener un excelente rendimiento incluso con cientos de miles de registros.
+
+La base de datos deberá estar preparada para crecer sin requerir rediseño.
+
+Quiero implementar un módulo profesional llamado:
+
+IMPORTACIÓN DE CATÁLOGOS
+
+Este módulo será la única fuente oficial para actualizar el catálogo institucional.
+
+No se capturarán manualmente ciudades, unidades ni cuartos.
+
+Toda esa información provendrá de archivos JSON.
+
+La importación deberá ser rápida, segura, validada y completamente transaccional.
+
+Si existe un error durante la importación, NO deberá almacenarse ningún registro.
+
+La base de datos deberá permanecer intacta.
+
+--------------------------------------------------
+
+ARCHIVOS SOPORTADOS
+
+--------------------------------------------------
+
+cities.json
+
+units.json
+
+rooms.json
+
+--------------------------------------------------
+
+ESTRUCTURAS
+
+--------------------------------------------------
+
+Las estructuras deberán respetar exactamente las siguientes interfaces:
+
+City
+
+- id
+- nombre
+
+Unit
+
+- id
+- nombre
+- cityId
+- tipo
+- activo
+
+Room
+
+- id
+- unitId
+- nombre
+
+No deberán aceptarse campos adicionales.
+
+No deberán faltar campos obligatorios.
+
+--------------------------------------------------
+
+VALIDACIONES
+
+--------------------------------------------------
+
+Antes de importar deberá verificarse:
+
+El archivo existe.
+
+El archivo puede abrirse.
+
+El JSON es válido.
+
+No contiene errores de sintaxis.
+
+No existen IDs duplicados.
+
+No existen nombres vacíos.
+
+Todas las ciudades utilizadas por las unidades existen.
+
+Todos los cuartos pertenecen a una unidad existente.
+
+Todos los tipos de unidad son válidos.
+
+No existen valores nulos donde no estén permitidos.
+
+No existen cadenas vacías.
+
+No existen referencias rotas.
+
+Si existe cualquier error:
+
+Cancelar completamente la importación.
+
+Mostrar un reporte detallado indicando:
+
+Archivo.
+
+Registro.
+
+Campo.
+
+Descripción del error.
+
+No realizar importaciones parciales.
+
+--------------------------------------------------
+
+PROCESO DE IMPORTACIÓN
+
+--------------------------------------------------
+
+Paso 1
+
+Seleccionar uno o varios archivos JSON.
+
+Paso 2
+
+Validar toda la información.
+
+Paso 3
+
+Mostrar un resumen.
+
+Ejemplo:
+
+Ciudades encontradas.
+
+Unidades encontradas.
+
+Cuartos encontrados.
+
+Registros nuevos.
+
+Registros modificados.
+
+Registros eliminados.
+
+Errores encontrados.
+
+Paso 4
+
+Solicitar confirmación.
+
+Paso 5
+
+Realizar la importación.
+
+Paso 6
+
+Actualizar la base de datos.
+
+Paso 7
+
+Registrar el evento en el historial.
+
+--------------------------------------------------
+
+SINCRONIZACIÓN
+
+--------------------------------------------------
+
+Durante la importación el sistema deberá detectar automáticamente:
+
+Ciudades nuevas.
+
+Ciudades modificadas.
+
+Unidades nuevas.
+
+Unidades modificadas.
+
+Cuartos nuevos.
+
+Cuartos modificados.
+
+Registros eliminados del catálogo oficial.
+
+Las modificaciones deberán actualizar únicamente la información oficial.
+
+Nunca deberán eliminar información operativa.
+
+--------------------------------------------------
+
+MUY IMPORTANTE
+
+--------------------------------------------------
+
+La información operativa nunca deberá perderse.
+
+Esto incluye:
+
+Direcciones IP.
+
+Tickets.
+
+Historial de monitoreo.
+
+Configuración.
+
+Respaldos.
+
+Logs.
+
+Exportaciones.
+
+Importaciones anteriores.
+
+Si una unidad cambia únicamente de nombre:
+
+Actualizar únicamente el nombre.
+
+Conservar toda la información asociada.
+
+Si cambia la ciudad:
+
+Actualizar únicamente la ciudad.
+
+Conservar toda la operación.
+
+Si cambia el tipo:
+
+Actualizar únicamente el tipo.
+
+Conservar todo lo demás.
+
+Si una unidad deja de existir en el catálogo oficial:
+
+Marcarla como inactiva.
+
+Nunca eliminarla físicamente.
+
+El historial deberá permanecer disponible.
+
+--------------------------------------------------
+
+INTERFAZ
+
+--------------------------------------------------
+
+Crear un módulo llamado:
+
+Importación de Catálogos
+
+Funciones:
+
+Importar ciudades.
+
+Importar unidades.
+
+Importar cuartos.
+
+Importar todo.
+
+Vista previa antes de importar.
+
+Validación automática.
+
+Barra de progreso.
+
+Resumen final.
+
+Historial de importaciones.
+
+Descargar reporte de errores en PDF.
+
+Descargar reporte de errores en Excel.
+
+--------------------------------------------------
+
+HISTORIAL
+
+--------------------------------------------------
+
+Registrar cada importación.
+
+Guardar:
+
+Fecha.
+
+Hora.
+
+Usuario.
+
+Archivo.
+
+Cantidad de registros.
+
+Duración.
+
+Resultado.
+
+Observaciones.
+
+--------------------------------------------------
+
+ESCALABILIDAD
+
+--------------------------------------------------
+
+El sistema deberá estar preparado para importar nuevos catálogos en el futuro.
+
+La arquitectura deberá permitir agregar nuevos tipos de importación sin modificar el código existente.
+
+La lógica de importación deberá implementarse mediante servicios reutilizables siguiendo Clean Architecture y SOLID.
+
+Quiero desarrollar un módulo profesional llamado:
+
+ADMINISTRACIÓN DE UNIDADES
+
+Este módulo administrará únicamente la configuración de monitoreo.
+
+El catálogo oficial de ciudades, unidades y cuartos proviene del módulo de importación JSON y NO podrá modificarse manualmente.
+
+Únicamente podrán administrarse las configuraciones locales relacionadas con el monitoreo.
+
+--------------------------------------------------
+OBJETIVOS
+--------------------------------------------------
+
+Permitir configurar completamente el monitoreo de cada unidad.
+
+Permitir agregar una cantidad ilimitada de direcciones IP por unidad.
+
+Cada dirección IP representará un segmento de red, un equipo o un enlace que deberá ser monitoreado.
+
+--------------------------------------------------
+VISTA PRINCIPAL
+--------------------------------------------------
+
+Mostrar una tabla profesional con las siguientes columnas:
+
+ID Oficial
+
+Nombre de la Unidad
+
+Ciudad
+
+Tipo
+
+Cantidad de IPs configuradas
+
+Cantidad de IPs críticas
+
+Estado actual
+
+Último ticket
+
+Última caída
+
+Última recuperación
+
+Disponibilidad mensual
+
+Permitir:
+
+Búsqueda instantánea.
+
+Filtros por ciudad.
+
+Filtros por tipo.
+
+Filtros por estado.
+
+Ordenamiento por cualquier columna.
+
+Paginación.
+
+Exportación.
+
+--------------------------------------------------
+DETALLE DE LA UNIDAD
+--------------------------------------------------
+
+Al seleccionar una unidad deberá abrirse una vista de detalle.
+
+Mostrar:
+
+Información General.
+
+Lista de Direcciones IP.
+
+Historial.
+
+Tickets.
+
+Estadísticas.
+
+Configuración.
+
+Utilizar pestañas para mantener una interfaz limpia.
+
+--------------------------------------------------
+ADMINISTRACIÓN DE IPS
+--------------------------------------------------
+
+Cada unidad podrá tener una cantidad ilimitada de direcciones IP.
+
+Cada IP tendrá los siguientes campos:
+
+Dirección IP
+
+Descripción
+
+Activa
+
+IP Crítica
+
+Intervalo de Ping (opcional)
+
+Timeout (opcional)
+
+Observaciones
+
+Fecha de alta
+
+Última modificación
+
+--------------------------------------------------
+REGLAS DE LAS IPS
+--------------------------------------------------
+
+Validar formato IPv4.
+
+No permitir direcciones duplicadas dentro de la misma unidad.
+
+Permitir la misma IP únicamente si pertenece a otra unidad y el usuario la confirma explícitamente.
+
+No permitir guardar direcciones inválidas.
+
+Validar que la IP no esté vacía.
+
+Validar longitud.
+
+Validar caracteres.
+
+--------------------------------------------------
+IP CRÍTICA
+--------------------------------------------------
+
+Cada IP podrá marcarse como:
+
+Crítica
+
+No crítica
+
+Únicamente las IPs críticas podrán generar tickets automáticos.
+
+Si una IP no crítica falla:
+
+Registrar el evento en el historial.
+
+NO generar ticket.
+
+NO cambiar el estado general de la unidad.
+
+--------------------------------------------------
+MÚLTIPLES IPS CRÍTICAS
+--------------------------------------------------
+
+Una unidad podrá tener una o varias IPs críticas.
+
+La configuración deberá permitir cualquiera de los siguientes modos:
+
+Modo A
+
+Si falla cualquier IP crítica:
+
+Generar ticket.
+
+Modo B
+
+Generar ticket únicamente cuando fallen todas las IPs críticas.
+
+El modo de operación deberá configurarse por unidad.
+
+--------------------------------------------------
+CONFIGURACIÓN LOCAL
+--------------------------------------------------
+
+Cada unidad podrá sobrescribir la configuración global.
+
+Por ejemplo:
+
+Intervalo de Ping
+
+Cantidad de fallos consecutivos
+
+Cantidad de recuperaciones consecutivas
+
+Timeout
+
+Si un valor no está definido localmente:
+
+Utilizar la configuración global.
+
+--------------------------------------------------
+ESTADO DE LA UNIDAD
+--------------------------------------------------
+
+Estados posibles:
+
+Operativa
+
+Monitoreando
+
+Con Incidencia
+
+Fuera de Servicio
+
+Deshabilitada
+
+Los estados deberán actualizarse automáticamente.
+
+--------------------------------------------------
+VALIDACIONES
+--------------------------------------------------
+
+Antes de guardar cualquier cambio:
+
+Validar formato IP.
+
+Validar duplicados.
+
+Validar longitud.
+
+Validar campos obligatorios.
+
+Validar coherencia de la configuración.
+
+--------------------------------------------------
+IMPORTANTE
+--------------------------------------------------
+
+Las direcciones IP NO forman parte del catálogo oficial JSON.
+
+Las IP pertenecen exclusivamente a la base de datos SQLite.
+
+Cuando se importe nuevamente el catálogo oficial:
+
+Nunca eliminar las IPs configuradas.
+
+Nunca modificar las IPs.
+
+Nunca perder la configuración local.
+
+Toda la configuración de monitoreo deberá permanecer intacta.
+
+--------------------------------------------------
+OBJETIVO FINAL
+--------------------------------------------------
+
+Separar completamente:
+
+Catálogo Oficial
+
+de
+
+Configuración Local del Monitoreo.
+
+Esta separación deberá mantenerse durante toda la vida del proyecto.
+
+
+Quiero desarrollar el componente más importante del sistema.
+
+Su nombre será:
+
+SME Monitor Service
+
+Será un servicio independiente desarrollado en Node.js.
+
+NO formará parte del Frontend.
+
+NO formará parte de la API.
+
+Será un proceso completamente independiente.
+
+Su única responsabilidad será monitorear permanentemente las direcciones IP configuradas.
+
+--------------------------------------------------
+OBJETIVOS
+--------------------------------------------------
+
+Monitorear automáticamente todas las IPs activas.
+
+Detectar caídas.
+
+Confirmar la caída.
+
+Generar tickets.
+
+Cerrar tickets.
+
+Actualizar estados.
+
+Registrar todo el historial.
+
+Funcionar las 24 horas del día.
+
+--------------------------------------------------
+EJECUCIÓN
+--------------------------------------------------
+
+El servicio deberá instalarse como Servicio de Windows.
+
+Deberá iniciar automáticamente cuando inicie Windows.
+
+No deberá requerir intervención del usuario.
+
+Si la interfaz está cerrada:
+
+Continuar monitoreando.
+
+Si la API está detenida:
+
+Continuar monitoreando.
+
+Si no existe conexión a Internet:
+
+Continuar monitoreando las IP locales.
+
+--------------------------------------------------
+CICLO DE TRABAJO
+--------------------------------------------------
+
+1.
+
+Leer todas las IP activas desde SQLite.
+
+2.
+
+Descartar IPs deshabilitadas.
+
+3.
+
+Ordenar la lista.
+
+4.
+
+Iniciar el monitoreo.
+
+5.
+
+Realizar ping.
+
+6.
+
+Guardar resultado.
+
+7.
+
+Esperar el intervalo configurado.
+
+8.
+
+Repetir indefinidamente.
+
+--------------------------------------------------
+CONFIGURACIÓN
+--------------------------------------------------
+
+Valores por defecto:
+
+Intervalo:
+
+30 segundos.
+
+Timeout:
+
+1000 ms.
+
+Fallos consecutivos:
+
+10.
+
+Recuperaciones consecutivas:
+
+3.
+
+Todos estos parámetros deberán poder modificarse desde Configuración.
+
+--------------------------------------------------
+DETECCIÓN DE FALLA
+--------------------------------------------------
+
+Cada IP tendrá un contador de fallos consecutivos.
+
+Si un ping responde correctamente:
+
+Reiniciar contador de fallos.
+
+Si un ping falla:
+
+Incrementar contador.
+
+Cuando el contador llegue al valor configurado:
+
+Confirmar la caída.
+
+Registrar evento.
+
+Generar ticket si corresponde.
+
+Actualizar estado.
+
+--------------------------------------------------
+RECUPERACIÓN
+--------------------------------------------------
+
+Cuando una IP comience a responder nuevamente:
+
+No cerrar inmediatamente el ticket.
+
+Esperar la cantidad configurada de respuestas consecutivas.
+
+Solo entonces:
+
+Cerrar ticket.
+
+Registrar recuperación.
+
+Actualizar estado.
+
+Calcular duración.
+
+--------------------------------------------------
+LATENCIA
+--------------------------------------------------
+
+Guardar la latencia obtenida en cada ping exitoso.
+
+Si el ping falla:
+
+Guardar el motivo del error.
+
+Ejemplos:
+
+Timeout.
+
+Host inaccesible.
+
+Red inalcanzable.
+
+Destino desconocido.
+
+--------------------------------------------------
+MODO DE MONITOREO
+--------------------------------------------------
+
+Cada unidad podrá trabajar en uno de dos modos.
+
+Modo 1
+
+Una sola IP crítica caída genera el ticket.
+
+Modo 2
+
+Todas las IP críticas deben estar caídas para generar el ticket.
+
+Esta configuración será específica para cada unidad.
+
+--------------------------------------------------
+ESTADOS
+--------------------------------------------------
+
+Cada IP tendrá:
+
+ONLINE
+
+OFFLINE
+
+MONITOREANDO
+
+DESHABILITADA
+
+Cada unidad tendrá:
+
+OPERATIVA
+
+MONITOREANDO
+
+CON INCIDENCIA
+
+FUERA DE SERVICIO
+
+DESHABILITADA
+
+--------------------------------------------------
+OPTIMIZACIÓN
+--------------------------------------------------
+
+No realizar pings secuenciales.
+
+Implementar una cola de trabajo con concurrencia controlada.
+
+Permitir monitorear cientos de IPs sin bloquear el sistema.
+
+Evitar consumo excesivo de CPU.
+
+Evitar consumo excesivo de memoria.
+
+El número máximo de pings simultáneos deberá ser configurable.
+
+--------------------------------------------------
+REGISTRO
+--------------------------------------------------
+
+Registrar automáticamente:
+
+Inicio del servicio.
+
+Detención.
+
+Reinicio.
+
+Cada caída.
+
+Cada recuperación.
+
+Errores.
+
+Excepciones.
+
+Cambios de configuración.
+
+--------------------------------------------------
+TOLERANCIA A FALLOS
+--------------------------------------------------
+
+Si SQLite está temporalmente bloqueada:
+
+Reintentar automáticamente.
+
+Si una IP deja de existir:
+
+Eliminarla de la cola.
+
+Si cambia la configuración:
+
+Actualizar la cola automáticamente sin reiniciar el servicio.
+
+--------------------------------------------------
+MONITOREO DEL PROPIO SERVICIO
+--------------------------------------------------
+
+El servicio deberá registrar:
+
+Tiempo de ejecución.
+
+Última ejecución.
+
+Versión.
+
+Cantidad de IPs monitoreadas.
+
+Cantidad de tickets abiertos.
+
+Uso aproximado de CPU.
+
+Uso aproximado de memoria.
+
+Fecha del último ciclo.
+
+Toda esta información deberá mostrarse en el Dashboard para verificar que el monitor está funcionando correctamente.
+
+--------------------------------------------------
+OBJETIVO FINAL
+--------------------------------------------------
+
+Construir un motor de monitoreo robusto, eficiente, estable y preparado para ejecutarse continuamente durante años sin intervención humana.
+
+La prioridad absoluta será la estabilidad y la confiabilidad del monitoreo.
+
+Quiero desarrollar un módulo completamente automático llamado:
+
+GESTIÓN DE TICKETS
+
+El usuario nunca creará tickets manualmente.
+
+Todos los tickets serán generados automáticamente por el Servicio Monitor.
+
+El sistema será responsable de:
+
+Crear.
+
+Actualizar.
+
+Cerrar.
+
+Registrar.
+
+Historial.
+
+Estadísticas.
+
+--------------------------------------------------
+OBJETIVO
+--------------------------------------------------
+
+Cada vez que una unidad presente una caída confirmada deberá generarse un ticket automáticamente.
+
+Cuando la unidad se recupere, el ticket deberá cerrarse automáticamente.
+
+Toda la información deberá conservarse permanentemente.
+
+--------------------------------------------------
+FOLIO
+--------------------------------------------------
+
+Cada ticket deberá tener un folio único.
+
+Formato sugerido:
+
+SME-AAAAMMDD-000001
+
+Ejemplo:
+
+SME-20260703-000001
+
+El consecutivo deberá reiniciarse automáticamente cada año.
+
+Nunca deberán existir folios duplicados.
+
+--------------------------------------------------
+INFORMACIÓN DEL TICKET
+--------------------------------------------------
+
+Cada ticket deberá almacenar:
+
+ID interno.
+
+Folio.
+
+Unidad.
+
+Ciudad.
+
+Tipo de unidad.
+
+Fecha de inicio.
+
+Hora de inicio.
+
+Fecha de recuperación.
+
+Hora de recuperación.
+
+Duración en segundos.
+
+Duración legible.
+
+Estado.
+
+Motivo.
+
+Cantidad de IPs afectadas.
+
+Usuario (si aplica).
+
+Observaciones.
+
+--------------------------------------------------
+DURACIÓN
+--------------------------------------------------
+
+La duración deberá calcularse automáticamente.
+
+Mostrar:
+
+Días.
+
+Horas.
+
+Minutos.
+
+Segundos.
+
+Ejemplo:
+
+2 días
+
+05 horas
+
+14 minutos
+
+33 segundos
+
+También almacenar el tiempo total en segundos para facilitar reportes y estadísticas.
+
+--------------------------------------------------
+ESTADOS
+--------------------------------------------------
+
+Estados posibles:
+
+Abierto
+
+Cerrado
+
+No eliminar estados.
+
+--------------------------------------------------
+DETALLE DEL TICKET
+--------------------------------------------------
+
+Cada ticket deberá tener un detalle.
+
+Mostrar:
+
+Direcciones IP afectadas.
+
+Descripción.
+
+Hora exacta de la caída.
+
+Hora exacta de recuperación.
+
+Cantidad de fallos consecutivos.
+
+Cantidad de recuperaciones.
+
+Latencia antes de la caída.
+
+Latencia después de la recuperación.
+
+--------------------------------------------------
+REAPERTURA
+--------------------------------------------------
+
+Si una unidad vuelve a fallar después de haberse recuperado:
+
+Crear un nuevo ticket.
+
+Nunca reutilizar tickets cerrados.
+
+Cada incidente deberá generar su propio historial.
+
+--------------------------------------------------
+CONSULTAS
+--------------------------------------------------
+
+Permitir buscar por:
+
+Folio.
+
+Unidad.
+
+Ciudad.
+
+Tipo.
+
+Estado.
+
+Fecha.
+
+Duración.
+
+IP.
+
+--------------------------------------------------
+FILTROS
+--------------------------------------------------
+
+Permitir filtros múltiples.
+
+Ejemplos:
+
+Ciudad + Fecha.
+
+Unidad + Estado.
+
+Tipo + Fecha.
+
+Duración mayor a.
+
+Duración menor a.
+
+--------------------------------------------------
+ORDENAMIENTO
+--------------------------------------------------
+
+Ordenar por:
+
+Fecha.
+
+Duración.
+
+Unidad.
+
+Ciudad.
+
+Estado.
+
+Folio.
+
+--------------------------------------------------
+EXPORTACIÓN
+--------------------------------------------------
+
+Permitir exportar:
+
+Un ticket.
+
+Varios tickets.
+
+Todo el historial.
+
+Formatos:
+
+PDF.
+
+Excel.
+
+--------------------------------------------------
+ESTADÍSTICAS
+--------------------------------------------------
+
+Calcular automáticamente:
+
+Cantidad de tickets por unidad.
+
+Cantidad de tickets por ciudad.
+
+Cantidad de tickets por tipo.
+
+Tiempo total caído.
+
+Tiempo promedio de recuperación.
+
+Tiempo máximo de caída.
+
+Tiempo mínimo de caída.
+
+Disponibilidad mensual.
+
+Disponibilidad anual.
+
+--------------------------------------------------
+REGLAS
+--------------------------------------------------
+
+Nunca permitir modificar manualmente:
+
+Hora de inicio.
+
+Hora de recuperación.
+
+Duración.
+
+Estado.
+
+Estos datos únicamente podrán ser modificados por el Servicio Monitor.
+
+--------------------------------------------------
+BITÁCORA
+--------------------------------------------------
+
+Registrar automáticamente:
+
+Ticket creado.
+
+Ticket actualizado.
+
+Ticket cerrado.
+
+Error durante creación.
+
+Error durante cierre.
+
+Toda modificación deberá quedar registrada en los logs.
+
+--------------------------------------------------
+OBJETIVO FINAL
+--------------------------------------------------
+
+Crear un sistema de tickets completamente automático, confiable y auditable, donde cada incidente quede documentado con precisión y pueda consultarse en cualquier momento para generar reportes, estadísticas y evidencia operativa.
+
+Quiero desarrollar el Dashboard principal del Sistema de Monitoreo de Enlaces (SME).
+
+Este Dashboard será la pantalla principal y deberá comportarse como un Centro de Operaciones de Red (NOC).
+
+El objetivo es que el usuario pueda conocer el estado completo de la infraestructura con solo abrir la aplicación.
+
+El Dashboard deberá actualizarse automáticamente en tiempo real sin necesidad de recargar la página.
+
+--------------------------------------------------
+OBJETIVO
+--------------------------------------------------
+
+Mostrar el estado operativo del sistema.
+
+Mostrar el estado de todas las unidades.
+
+Mostrar tickets activos.
+
+Mostrar indicadores generales.
+
+Permitir acceder rápidamente al detalle de cualquier unidad.
+
+--------------------------------------------------
+DISEÑO
+--------------------------------------------------
+
+Mantener el tema oscuro definido anteriormente.
+
+Diseño limpio.
+
+Minimalista.
+
+Profesional.
+
+Sin gráficos innecesarios.
+
+Sin exceso de colores.
+
+La prioridad será mostrar información útil.
+
+--------------------------------------------------
+INDICADORES SUPERIORES
+--------------------------------------------------
+
+Mostrar tarjetas discretas con la siguiente información:
+
+Total de unidades.
+
+Total de unidades activas.
+
+Unidades operativas.
+
+Unidades con incidencia.
+
+Tickets abiertos.
+
+Tickets cerrados hoy.
+
+Disponibilidad general.
+
+Tiempo promedio de recuperación.
+
+Tiempo total de caída del día.
+
+Última actualización del monitor.
+
+--------------------------------------------------
+ESTADO DEL MONITOR
+--------------------------------------------------
+
+Mostrar un panel indicando:
+
+Estado del Servicio Monitor.
+
+Versión.
+
+Tiempo en ejecución.
+
+Último ciclo ejecutado.
+
+Cantidad de IPs monitoreadas.
+
+Uso aproximado de CPU.
+
+Uso aproximado de memoria.
+
+Última actualización.
+
+Si el monitor deja de funcionar deberá mostrarse una advertencia visible.
+
+--------------------------------------------------
+TABLA PRINCIPAL
+--------------------------------------------------
+
+Mostrar todas las unidades.
+
+Columnas:
+
+Estado.
+
+ID Oficial.
+
+Unidad.
+
+Ciudad.
+
+Tipo.
+
+IPs configuradas.
+
+IPs críticas.
+
+Ticket activo.
+
+Tiempo de caída.
+
+Última recuperación.
+
+Disponibilidad mensual.
+
+--------------------------------------------------
+ACCIONES
+--------------------------------------------------
+
+Cada fila deberá permitir:
+
+Abrir detalle.
+
+Ver historial.
+
+Ver tickets.
+
+Ver IPs.
+
+Generar reporte.
+
+--------------------------------------------------
+BÚSQUEDA
+--------------------------------------------------
+
+Implementar búsqueda instantánea.
+
+Buscar por:
+
+ID.
+
+Nombre.
+
+Ciudad.
+
+Tipo.
+
+Dirección IP.
+
+Folio de ticket.
+
+--------------------------------------------------
+FILTROS
+--------------------------------------------------
+
+Permitir combinar filtros.
+
+Ciudad.
+
+Tipo.
+
+Estado.
+
+Disponibilidad.
+
+Con ticket.
+
+Sin ticket.
+
+Activas.
+
+Inactivas.
+
+--------------------------------------------------
+ORDENAMIENTO
+--------------------------------------------------
+
+Ordenar por cualquier columna.
+
+Ascendente.
+
+Descendente.
+
+--------------------------------------------------
+ACTUALIZACIÓN
+--------------------------------------------------
+
+La información deberá actualizarse automáticamente.
+
+No utilizar recarga completa de la página.
+
+Actualizar únicamente los elementos modificados.
+
+--------------------------------------------------
+COLORES DE ESTADO
+--------------------------------------------------
+
+Operativa:
+
+Verde.
+
+Con incidencia:
+
+Rojo.
+
+Monitoreando:
+
+Amarillo.
+
+Fuera de servicio:
+
+Rojo intenso.
+
+Deshabilitada:
+
+Gris.
+
+No utilizar más colores de los necesarios.
+
+--------------------------------------------------
+PANEL DE EVENTOS RECIENTES
+--------------------------------------------------
+
+Mostrar los últimos eventos registrados.
+
+Ejemplos:
+
+Unidad recuperada.
+
+Nuevo ticket.
+
+Importación realizada.
+
+Respaldo generado.
+
+Configuración modificada.
+
+Monitor iniciado.
+
+Mostrar únicamente los eventos más recientes.
+
+--------------------------------------------------
+PANEL DE TICKETS ACTIVOS
+--------------------------------------------------
+
+Mostrar todos los tickets abiertos.
+
+Columnas:
+
+Folio.
+
+Unidad.
+
+Hora de inicio.
+
+Tiempo transcurrido.
+
+Estado.
+
+Permitir abrir el detalle del ticket.
+
+--------------------------------------------------
+RESPONSIVE
+--------------------------------------------------
+
+En pantallas pequeñas reorganizar automáticamente los paneles.
+
+Mantener la funcionalidad completa.
+
+La información nunca deberá perderse.
+
+--------------------------------------------------
+RENDIMIENTO
+--------------------------------------------------
+
+El Dashboard deberá responder rápidamente incluso con cientos de unidades y miles de tickets.
+
+Optimizar consultas.
+
+Optimizar renderizado.
+
+Optimizar actualizaciones.
+
+--------------------------------------------------
+OBJETIVO FINAL
+--------------------------------------------------
+
+Construir un Dashboard que funcione como el centro de operaciones del sistema, proporcionando una visión clara, inmediata y en tiempo real del estado de toda la infraestructura monitoreada, con acceso rápido a cualquier información relevante.
+
+Quiero desarrollar un módulo llamado:
+
+HISTORIAL Y CONSULTAS
+
+Este módulo será el repositorio histórico del sistema.
+
+Toda la información generada por el Servicio Monitor deberá poder consultarse posteriormente.
+
+Nunca eliminar información histórica de manera automática, excepto el historial de pings si así se configura.
+
+El historial deberá ser rápido, fácil de consultar y altamente optimizado.
+
+--------------------------------------------------
+OBJETIVO
+--------------------------------------------------
+
+Permitir consultar cualquier incidente ocurrido desde la creación del sistema.
+
+Facilitar auditorías.
+
+Generar evidencia.
+
+Analizar comportamiento de la infraestructura.
+
+Obtener estadísticas históricas.
+
+--------------------------------------------------
+SECCIONES
+--------------------------------------------------
+
+El módulo deberá dividirse en:
+
+Historial de Tickets.
+
+Historial de Monitoreo.
+
+Historial de Eventos.
+
+Historial de Importaciones.
+
+Historial de Respaldos.
+
+Historial de Exportaciones.
+
+--------------------------------------------------
+HISTORIAL DE TICKETS
+--------------------------------------------------
+
+Mostrar una tabla con:
+
+Folio.
+
+Unidad.
+
+Ciudad.
+
+Tipo.
+
+Fecha inicio.
+
+Hora inicio.
+
+Fecha recuperación.
+
+Hora recuperación.
+
+Duración.
+
+Estado.
+
+Permitir abrir el detalle completo.
+
+--------------------------------------------------
+HISTORIAL DE MONITOREO
+--------------------------------------------------
+
+Permitir consultar todos los resultados de ping.
+
+Mostrar:
+
+Fecha.
+
+Hora.
+
+Unidad.
+
+IP.
+
+Resultado.
+
+Latencia.
+
+Mensaje de error.
+
+Este historial podrá limitarse mediante configuración para evitar un crecimiento excesivo de la base de datos.
+
+--------------------------------------------------
+HISTORIAL DE EVENTOS
+--------------------------------------------------
+
+Registrar cronológicamente todos los eventos importantes.
+
+Ejemplos:
+
+Monitor iniciado.
+
+Monitor detenido.
+
+Ticket creado.
+
+Ticket cerrado.
+
+Importación realizada.
+
+Respaldo generado.
+
+Configuración modificada.
+
+Error interno.
+
+Excepción.
+
+--------------------------------------------------
+CONSULTAS
+--------------------------------------------------
+
+Permitir buscar por:
+
+Unidad.
+
+Ciudad.
+
+Tipo.
+
+Dirección IP.
+
+Folio.
+
+Fecha.
+
+Rango de fechas.
+
+Estado.
+
+Duración.
+
+--------------------------------------------------
+FILTROS AVANZADOS
+--------------------------------------------------
+
+Permitir combinar filtros.
+
+Ejemplos:
+
+Ciudad + Fecha.
+
+Unidad + Fecha.
+
+Tipo + Estado.
+
+Duración mayor a.
+
+Duración menor a.
+
+Solo tickets abiertos.
+
+Solo tickets cerrados.
+
+Solo incidencias críticas.
+
+--------------------------------------------------
+ORDENAMIENTO
+--------------------------------------------------
+
+Ordenar por:
+
+Fecha.
+
+Duración.
+
+Unidad.
+
+Ciudad.
+
+Estado.
+
+Folio.
+
+Latencia.
+
+--------------------------------------------------
+DETALLE DEL REGISTRO
+--------------------------------------------------
+
+Cada registro deberá mostrar:
+
+Información general.
+
+Cronología.
+
+IPs involucradas.
+
+Tiempo exacto de la incidencia.
+
+Eventos asociados.
+
+Logs relacionados.
+
+--------------------------------------------------
+CRONOLOGÍA
+--------------------------------------------------
+
+Mostrar una línea de tiempo del incidente.
+
+Ejemplo:
+
+08:14:20
+
+Inicio de fallos.
+
+↓
+
+08:18:50
+
+Décimo fallo consecutivo.
+
+↓
+
+08:18:50
+
+Ticket generado.
+
+↓
+
+09:42:11
+
+Primera respuesta.
+
+↓
+
+09:43:11
+
+Tercera respuesta consecutiva.
+
+↓
+
+09:43:11
+
+Ticket cerrado.
+
+--------------------------------------------------
+RETENCIÓN DEL HISTORIAL
+--------------------------------------------------
+
+Permitir configurar:
+
+Conservar historial de pings durante:
+
+30 días.
+
+90 días.
+
+180 días.
+
+365 días.
+
+Personalizado.
+
+Los tickets nunca deberán eliminarse automáticamente.
+
+Los logs podrán archivarse si así se configura.
+
+--------------------------------------------------
+RENDIMIENTO
+--------------------------------------------------
+
+Optimizar todas las consultas mediante índices.
+
+Implementar paginación.
+
+No cargar todos los registros en memoria.
+
+Permitir consultar bases de datos con millones de registros.
+
+--------------------------------------------------
+EXPORTACIÓN
+--------------------------------------------------
+
+Permitir exportar cualquier consulta.
+
+Formatos:
+
+PDF.
+
+Excel.
+
+CSV.
+
+La exportación deberá respetar los filtros aplicados.
+
+--------------------------------------------------
+OBJETIVO FINAL
+--------------------------------------------------
+
+Construir un módulo histórico robusto, optimizado y preparado para auditorías, donde cualquier incidente pueda localizarse rápidamente mediante filtros avanzados y donde toda la información permanezca disponible para análisis y generación de evidencia.
+
+Quiero desarrollar un módulo profesional llamado:
+
+REPORTES
+
+Este módulo permitirá generar reportes ejecutivos y técnicos a partir de toda la información almacenada en el sistema.
+
+Los reportes deberán poder visualizarse antes de exportarse.
+
+La exportación deberá realizarse localmente.
+
+No utilizar servicios externos.
+
+--------------------------------------------------
+OBJETIVO
+--------------------------------------------------
+
+Generar evidencia documental.
+
+Facilitar auditorías.
+
+Presentar estadísticas.
+
+Analizar comportamiento de la red.
+
+Exportar información filtrada.
+
+--------------------------------------------------
+FORMATOS SOPORTADOS
+--------------------------------------------------
+
+PDF
+
+Excel (.xlsx)
+
+CSV
+
+Todos los formatos deberán contener exactamente la misma información.
+
+--------------------------------------------------
+TIPOS DE REPORTES
+--------------------------------------------------
+
+Reporte General.
+
+Reporte por Unidad.
+
+Reporte por Ciudad.
+
+Reporte por Tipo de Unidad.
+
+Reporte de Tickets.
+
+Reporte de Disponibilidad.
+
+Reporte de Caídas.
+
+Reporte de Recuperaciones.
+
+Reporte de Latencia.
+
+Reporte Personalizado.
+
+--------------------------------------------------
+FILTROS
+--------------------------------------------------
+
+Permitir combinar múltiples filtros.
+
+Ciudad.
+
+Unidad.
+
+Tipo.
+
+Estado.
+
+Fecha inicial.
+
+Fecha final.
+
+Duración.
+
+Ticket.
+
+Dirección IP.
+
+Disponibilidad.
+
+--------------------------------------------------
+COLUMNAS CONFIGURABLES
+--------------------------------------------------
+
+El usuario podrá elegir qué columnas incluir.
+
+Ejemplo:
+
+ID Oficial.
+
+Unidad.
+
+Ciudad.
+
+Tipo.
+
+IP.
+
+Estado.
+
+Fecha Inicio.
+
+Fecha Recuperación.
+
+Duración.
+
+Disponibilidad.
+
+Folio.
+
+Latencia.
+
+Observaciones.
+
+--------------------------------------------------
+REPORTE PDF
+--------------------------------------------------
+
+Diseño profesional.
+
+Tema claro para impresión.
+
+Encabezado configurable.
+
+Logotipo configurable.
+
+Nombre de la institución.
+
+Nombre del sistema.
+
+Fecha y hora de generación.
+
+Número de página.
+
+Pie de página.
+
+Resumen ejecutivo.
+
+Tabla principal.
+
+Totales.
+
+Observaciones.
+
+--------------------------------------------------
+REPORTE EXCEL
+--------------------------------------------------
+
+Crear hojas organizadas.
+
+Encabezados.
+
+Filtros automáticos.
+
+Autoajuste de columnas.
+
+Formato de fechas.
+
+Formato de duración.
+
+Congelar encabezados.
+
+Preparado para análisis posterior.
+
+--------------------------------------------------
+REPORTE CSV
+--------------------------------------------------
+
+Archivo compatible con Microsoft Excel.
+
+Separador configurable.
+
+Codificación UTF-8.
+
+--------------------------------------------------
+VISTA PREVIA
+--------------------------------------------------
+
+Antes de exportar mostrar:
+
+Cantidad de registros.
+
+Filtros aplicados.
+
+Columnas seleccionadas.
+
+Formato de salida.
+
+Nombre del archivo.
+
+--------------------------------------------------
+ESTADÍSTICAS
+--------------------------------------------------
+
+Los reportes deberán calcular automáticamente:
+
+Cantidad total de tickets.
+
+Cantidad de incidencias.
+
+Tiempo total caído.
+
+Tiempo promedio de recuperación.
+
+Mayor tiempo de caída.
+
+Menor tiempo de caída.
+
+Disponibilidad promedio.
+
+Cantidad de unidades afectadas.
+
+Cantidad de IPs monitoreadas.
+
+--------------------------------------------------
+NOMBRES DE ARCHIVOS
+--------------------------------------------------
+
+Generar nombres automáticamente.
+
+Ejemplo:
+
+Reporte_Tickets_2026-07-03.pdf
+
+Reporte_Unidad_UMF22_2026-07-03.xlsx
+
+Reporte_Disponibilidad_Junio_2026.csv
+
+--------------------------------------------------
+HISTORIAL
+--------------------------------------------------
+
+Registrar todas las exportaciones.
+
+Guardar:
+
+Fecha.
+
+Hora.
+
+Usuario.
+
+Tipo de reporte.
+
+Formato.
+
+Ruta.
+
+Resultado.
+
+Duración de la generación.
+
+--------------------------------------------------
+IMPRESIÓN
+--------------------------------------------------
+
+Los PDF deberán estar optimizados para impresión.
+
+Formato A4.
+
+Márgenes adecuados.
+
+Saltos de página automáticos.
+
+Tablas correctamente divididas.
+
+Encabezado repetido en cada página.
+
+--------------------------------------------------
+RENDIMIENTO
+--------------------------------------------------
+
+El sistema deberá poder exportar miles de registros sin bloquear la aplicación.
+
+Utilizar generación por lotes cuando sea necesario.
+
+Mostrar barra de progreso durante la exportación.
+
+--------------------------------------------------
+OBJETIVO FINAL
+--------------------------------------------------
+
+Construir un módulo de reportes profesional que permita generar documentación técnica y ejecutiva de alta calidad, útil para auditorías, análisis operativos y respaldo de incidentes, con exportaciones rápidas, configurables y completamente locales.
+
+Quiero desarrollar un módulo profesional llamado:
+
+CONFIGURACIÓN DEL SISTEMA
+
+y un módulo independiente llamado:
+
+RESPALDOS
+
+Ambos módulos deberán ser completamente locales.
+
+No utilizar almacenamiento en la nube.
+
+No utilizar servicios externos.
+
+Toda la información deberá almacenarse dentro del equipo donde se encuentre instalado el sistema.
+
+--------------------------------------------------
+MÓDULO DE CONFIGURACIÓN
+--------------------------------------------------
+
+El sistema deberá permitir modificar todos los parámetros sin editar archivos manualmente.
+
+Toda la configuración deberá almacenarse en SQLite.
+
+Los cambios deberán aplicarse automáticamente sin reiniciar la aplicación.
+
+--------------------------------------------------
+CONFIGURACIÓN DEL MONITOR
+--------------------------------------------------
+
+Permitir modificar:
+
+Intervalo entre pings.
+
+Cantidad de fallos consecutivos para declarar una caída.
+
+Cantidad de respuestas consecutivas para declarar una recuperación.
+
+Timeout del ping.
+
+Cantidad máxima de pings simultáneos.
+
+Tiempo de conservación del historial de pings.
+
+Modo de monitoreo por defecto:
+
+• Cualquier IP crítica genera ticket.
+
+• Todas las IPs críticas generan ticket.
+
+--------------------------------------------------
+CONFIGURACIÓN GENERAL
+--------------------------------------------------
+
+Permitir configurar:
+
+Nombre de la institución.
+
+Nombre del sistema.
+
+Versión.
+
+Ruta de exportaciones.
+
+Ruta de respaldos.
+
+Ruta de logs.
+
+Idioma.
+
+Zona horaria.
+
+Formato de fecha.
+
+Formato de hora.
+
+Formato de duración.
+
+Logo institucional para reportes PDF.
+
+--------------------------------------------------
+CONFIGURACIÓN DE LA BASE DE DATOS
+--------------------------------------------------
+
+Mostrar:
+
+Ubicación del archivo SQLite.
+
+Tamaño actual.
+
+Fecha de creación.
+
+Cantidad de registros.
+
+Estado de integridad.
+
+Permitir ejecutar una verificación de integridad de la base de datos.
+
+--------------------------------------------------
+MÓDULO DE RESPALDOS
+--------------------------------------------------
+
+El sistema deberá permitir crear respaldos completos.
+
+El respaldo deberá incluir:
+
+Base de datos SQLite.
+
+Configuración.
+
+Logs (opcional).
+
+Archivos de exportación (opcional).
+
+No respaldar archivos temporales.
+
+--------------------------------------------------
+TIPOS DE RESPALDO
+--------------------------------------------------
+
+Respaldo Manual.
+
+Respaldo Automático.
+
+--------------------------------------------------
+RESPALDOS AUTOMÁTICOS
+--------------------------------------------------
+
+Configurar:
+
+Diario.
+
+Semanal.
+
+Mensual.
+
+Al iniciar el sistema.
+
+Antes de importar catálogos.
+
+Antes de restaurar un respaldo.
+
+Antes de actualizar el sistema.
+
+--------------------------------------------------
+FORMATO DEL RESPALDO
+--------------------------------------------------
+
+Los respaldos deberán comprimirse automáticamente.
+
+Formato sugerido:
+
+ZIP
+
+Nombre sugerido:
+
+SME_Backup_AAAA-MM-DD_HHMM.zip
+
+Ejemplo:
+
+SME_Backup_2026-07-03_103500.zip
+
+--------------------------------------------------
+RESTAURACIÓN
+--------------------------------------------------
+
+Permitir restaurar cualquier respaldo.
+
+Antes de restaurar:
+
+Validar integridad.
+
+Mostrar información del respaldo.
+
+Fecha.
+
+Hora.
+
+Versión.
+
+Tamaño.
+
+Cantidad de registros.
+
+Solicitar confirmación.
+
+Crear automáticamente un respaldo del estado actual antes de restaurar.
+
+--------------------------------------------------
+HISTORIAL DE RESPALDOS
+--------------------------------------------------
+
+Registrar:
+
+Fecha.
+
+Hora.
+
+Usuario.
+
+Tipo.
+
+Ubicación.
+
+Duración.
+
+Resultado.
+
+Observaciones.
+
+Permitir buscar.
+
+Filtrar.
+
+Ordenar.
+
+Eliminar registros del historial sin eliminar el archivo físico (opcional).
+
+--------------------------------------------------
+VALIDACIONES
+--------------------------------------------------
+
+Verificar espacio disponible antes de generar un respaldo.
+
+Verificar permisos de escritura.
+
+Verificar integridad del archivo.
+
+Detectar archivos corruptos.
+
+Cancelar automáticamente si existe algún error.
+
+--------------------------------------------------
+IMPORTANTE
+--------------------------------------------------
+
+Nunca sobrescribir un respaldo existente.
+
+Cada respaldo deberá tener un nombre único.
+
+Nunca eliminar respaldos automáticamente, salvo que exista una política de retención configurable.
+
+--------------------------------------------------
+POLÍTICA DE RETENCIÓN
+--------------------------------------------------
+
+Permitir conservar:
+
+Los últimos X respaldos.
+
+Los respaldos de los últimos X días.
+
+Conservar todos.
+
+La política deberá ser configurable.
+
+--------------------------------------------------
+OBJETIVO FINAL
+--------------------------------------------------
+
+Construir un sistema de configuración y respaldos completamente profesional, seguro y confiable, que permita administrar todos los parámetros del sistema, proteger la información mediante copias de seguridad y restaurar el sistema en cualquier momento sin pérdida de datos.
+
+Quiero que integres todas las especificaciones entregadas en las Partes 1 a la 12 como una única especificación funcional.
+
+No ignores ninguna parte anterior.
+
+Todo el sistema deberá desarrollarse respetando exactamente la arquitectura previamente definida.
+
+--------------------------------------------------
+MÓDULO DE LOGS
+--------------------------------------------------
+
+Desarrollar un módulo llamado:
+
+LOGS DEL SISTEMA
+
+Este módulo será la bitácora oficial del SME.
+
+Toda acción importante deberá registrarse automáticamente.
+
+Nunca depender de intervención del usuario.
+
+--------------------------------------------------
+OBJETIVO
+--------------------------------------------------
+
+Permitir auditoría completa del sistema.
+
+Facilitar el diagnóstico de errores.
+
+Registrar el comportamiento del Servicio Monitor.
+
+Registrar todas las acciones importantes.
+
+--------------------------------------------------
+NIVELES DE LOG
+--------------------------------------------------
+
+DEBUG
+
+INFO
+
+WARNING
+
+ERROR
+
+CRITICAL
+
+Cada evento deberá registrarse con su nivel correspondiente.
+
+--------------------------------------------------
+INFORMACIÓN DEL LOG
+--------------------------------------------------
+
+Cada registro deberá almacenar:
+
+ID
+
+Fecha
+
+Hora
+
+FechaHora completa
+
+Nivel
+
+Módulo
+
+Evento
+
+Descripción
+
+Usuario (si aplica)
+
+Equipo (si aplica)
+
+Versión del sistema
+
+--------------------------------------------------
+MÓDULOS QUE GENERAN LOGS
+--------------------------------------------------
+
+Servicio Monitor.
+
+API.
+
+Frontend.
+
+Importación.
+
+Exportaciones.
+
+Respaldos.
+
+Configuración.
+
+Tickets.
+
+Base de datos.
+
+Inicio y cierre del sistema.
+
+--------------------------------------------------
+EVENTOS A REGISTRAR
+--------------------------------------------------
+
+Inicio del sistema.
+
+Cierre del sistema.
+
+Inicio del Servicio Monitor.
+
+Detención del Servicio Monitor.
+
+Reinicio del Servicio Monitor.
+
+Ping exitoso (opcional según configuración).
+
+Ping fallido.
+
+Caída confirmada.
+
+Recuperación confirmada.
+
+Creación de ticket.
+
+Cierre de ticket.
+
+Error de SQLite.
+
+Error de lectura.
+
+Error de escritura.
+
+Importación iniciada.
+
+Importación finalizada.
+
+Respaldo iniciado.
+
+Respaldo finalizado.
+
+Restauración iniciada.
+
+Restauración finalizada.
+
+Exportación PDF.
+
+Exportación Excel.
+
+Cambio de configuración.
+
+Excepción no controlada.
+
+--------------------------------------------------
+CONSULTA DE LOGS
+--------------------------------------------------
+
+Permitir:
+
+Búsqueda instantánea.
+
+Filtros múltiples.
+
+Ordenamiento.
+
+Paginación.
+
+Exportación.
+
+Filtros por:
+
+Fecha.
+
+Nivel.
+
+Módulo.
+
+Evento.
+
+Texto.
+
+--------------------------------------------------
+RETENCIÓN
+--------------------------------------------------
+
+La política de retención deberá ser configurable.
+
+Permitir conservar:
+
+30 días.
+
+90 días.
+
+180 días.
+
+365 días.
+
+Conservar permanentemente.
+
+--------------------------------------------------
+EXPORTACIÓN
+--------------------------------------------------
+
+Permitir exportar los logs en:
+
+PDF.
+
+Excel.
+
+CSV.
+
+--------------------------------------------------
+PROMPT MAESTRO
+--------------------------------------------------
+
+A partir de este momento deberás considerar las Partes 1 a la 13 como una única especificación oficial del proyecto.
+
+No omitir funcionalidades.
+
+No simplificar procesos.
+
+No reemplazar tecnologías sin justificarlo.
+
+Antes de generar código, analizar completamente la arquitectura.
+
+Si detectas una mejora importante, proponerla antes de implementarla.
+
+Todo el código deberá cumplir con:
+
+• Clean Architecture
+
+• SOLID
+
+• DRY
+
+• KISS
+
+• Repository Pattern
+
+• Service Pattern
+
+• Separación estricta de responsabilidades.
+
+Generar un proyecto completamente funcional, listo para producción, modular, mantenible y escalable.
+
+Todo el código deberá estar documentado.
+
+Todo el código deberá escribirse en TypeScript.
+
+Toda la interfaz deberá seguir el tema oscuro definido anteriormente.
+
+Toda la información deberá almacenarse en SQLite.
+
+El Servicio Monitor deberá ejecutarse permanentemente como un Servicio de Windows independiente.
+
+La aplicación deberá funcionar como PWA instalable.
+
+No utilizar servicios en la nube.
+
+No utilizar dependencias innecesarias.
+
+Optimizar rendimiento, consumo de memoria y uso de CPU.
+
+El resultado esperado es un sistema profesional de monitoreo de enlaces para uso institucional, preparado para crecer durante años, con una arquitectura limpia, estable y fácil de mantener.
