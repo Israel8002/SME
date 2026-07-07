@@ -5,6 +5,7 @@ const db_1 = require("../config/db");
 const logger_1 = require("../config/logger");
 const shared_1 = require("shared");
 const catalogSync_1 = require("../utils/catalogSync");
+const TicketController_1 = require("./TicketController");
 class UnitController {
     static async getUnits(req, res) {
         try {
@@ -157,13 +158,17 @@ class UnitController {
             else if (ips.length === 0) {
                 calculatedState = "Monitoreando";
             }
+            const mappedTickets = tickets.map((t) => ({
+                ...t,
+                duracionLegible: (0, TicketController_1.formatDuration)(t.duracionSegundos, t.estado === "Abierto", t.fechaInicio, t.horaInicio)
+            }));
             res.json({
                 ...unit,
                 estado: calculatedState,
                 disponibilidad,
                 rooms,
                 ips,
-                tickets
+                tickets: mappedTickets
             });
         }
         catch (error) {
@@ -407,10 +412,13 @@ async function calculateAvailability(unitId) {
         // Sum total downtime in the last 30 days
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - daysInMonth);
-        const dateStr = thirtyDaysAgo.toISOString().substring(0, 10);
+        const year = thirtyDaysAgo.getFullYear();
+        const month = String(thirtyDaysAgo.getMonth() + 1).padStart(2, "0");
+        const day = String(thirtyDaysAgo.getDate()).padStart(2, "0");
+        const dateStr = `${year}-${month}-${day}`;
         const downtimeRow = await db_1.query.get(`SELECT SUM(
         CASE 
-          WHEN fechaFin IS NULL THEN strftime('%s', 'now') - strftime('%s', fechaInicio || ' ' || horaInicio)
+          WHEN fechaFin IS NULL THEN strftime('%s', 'now') - strftime('%s', fechaInicio || ' ' || horaInicio, 'utc')
           ELSE duracionSegundos 
         END
        ) AS totalDowntime

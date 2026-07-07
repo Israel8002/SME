@@ -41,11 +41,14 @@ app.delete("/api/units/:id/rooms/:roomId", UnitController.deleteRoom);
 app.get("/api/tickets", TicketController.getTickets);
 app.get("/api/tickets/:id", TicketController.getTicketDetail);
 app.post("/api/tickets/:id/close", TicketController.closeTicket);
+app.put("/api/tickets/:id/proveedor", TicketController.updateTicketProveedor);
+app.post("/api/tickets/bulk-delete", TicketController.deleteTicketsBulk);
 app.delete("/api/tickets", TicketController.deleteTicketsByRange);
 app.delete("/api/tickets/:id", TicketController.deleteTicket);
 
 // --- Logs Endpoints ---
 app.get("/api/logs", LogController.getLogs);
+app.delete("/api/logs", LogController.clearLogs);
 
 // --- Import Endpoints ---
 app.get("/api/imports", ImportController.getImportHistory);
@@ -74,7 +77,11 @@ app.get("/api/status", async (req, res) => {
     const openTickets = await query.get<{ count: number }>("SELECT COUNT(*) AS count FROM tickets WHERE estado = 'Abierto'");
     
     // Tickets closed today
-    const today = new Date().toISOString().substring(0, 10);
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const today = `${year}-${month}-${day}`;
     const closedToday = await query.get<{ count: number }>(
       "SELECT COUNT(*) AS count FROM tickets WHERE estado = 'Cerrado' AND fechaFin = ?",
       [today]
@@ -128,7 +135,7 @@ const frontendDistPath = path.resolve(__dirname, "../../frontend/dist");
 app.use(express.static(frontendDistPath));
 
 app.get("*", (req, res, next) => {
-  if (req.path.startsWith("/api")) {
+  if (req.path.startsWith("/api") || req.path.includes(".")) {
     return next();
   }
   res.sendFile(path.join(frontendDistPath, "index.html"));

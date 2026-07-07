@@ -17,9 +17,13 @@ export class ImportController {
     const startTime = Date.now();
     const type = (req.query.type as string) || "all"; // 'cities', 'units', 'rooms', 'all'
     const payload = req.body;
-    const nowISO = new Date().toISOString();
-    const today = nowISO.substring(0, 10);
-    const timeNow = nowISO.substring(11, 19);
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const today = `${year}-${month}-${day}`;
+    const timeNow = now.toTimeString().substring(0, 8);
+    const nowISO = now.toISOString();
 
     if (!Array.isArray(payload)) {
       return res.status(400).json({ error: "Payload must be a JSON array" });

@@ -32,7 +32,10 @@ export class ExportController {
       let filename = "";
       
       const now = new Date();
-      const dateStr = now.toISOString().substring(0, 10);
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
       const timeStr = now.toTimeString().substring(0, 8).replace(/:/g, "");
 
       if (type === "tickets") {
@@ -85,7 +88,7 @@ export class ExportController {
 
       // Record export log
       const logExport = async (success: boolean, filePath: string) => {
-        const today = now.toISOString().substring(0, 10);
+        const today = dateStr;
         const timeNow = now.toTimeString().substring(0, 8);
         await query.run(
           `INSERT INTO exports (tipo, fecha, hora, usuario, ruta, resultado)
@@ -158,15 +161,16 @@ function generateCSV(type: string, data: any[]): string {
   let rows: string[][] = [];
 
   if (type === "tickets") {
-    headers = ["Folio", "Unidad", "Ciudad", "Tipo", "Inicio", "Fin", "Duracion (Seg)", "Estado", "Motivo"];
+    headers = ["Folio", "Ticket Proveedor", "Unidad", "Ciudad", "Tipo", "Inicio", "Fin", "Duración", "Estado", "Motivo"];
     rows = data.map(t => [
       t.folio,
+      t.ticketProveedor || "No asignado",
       t.unidadNombre,
       t.ciudadNombre,
       t.unidadTipo,
       `${t.fechaInicio} ${t.horaInicio}`,
       t.fechaFin ? `${t.fechaFin} ${t.horaFin}` : "Abierto",
-      t.duracionSegundos.toString(),
+      formatDurationExport(t.duracionSegundos),
       t.estado,
       t.motivo
     ]);
@@ -218,12 +222,13 @@ async function generateExcel(type: string, data: any[]): Promise<ExcelJS.Workboo
   if (type === "tickets") {
     sheet.columns = [
       { header: "Folio", key: "folio", width: 22 },
+      { header: "Ticket Proveedor", key: "ticketProveedor", width: 22 },
       { header: "Unidad", key: "unidad", width: 30 },
       { header: "Ciudad", key: "ciudad", width: 18 },
       { header: "Tipo de Unidad", key: "tipo", width: 22 },
       { header: "Fecha Inicio", key: "inicio", width: 22 },
       { header: "Fecha Fin/Cierre", key: "fin", width: 22 },
-      { header: "Duración (Seg)", key: "duracion", width: 16 },
+      { header: "Duración", key: "duracion", width: 24 },
       { header: "Estado", key: "estado", width: 14 },
       { header: "Motivo", key: "motivo", width: 35 }
     ];
@@ -231,12 +236,13 @@ async function generateExcel(type: string, data: any[]): Promise<ExcelJS.Workboo
     data.forEach(t => {
       sheet.addRow({
         folio: t.folio,
+        ticketProveedor: t.ticketProveedor || "No asignado",
         unidad: t.unidadNombre,
         ciudad: t.ciudadNombre,
         tipo: t.unidadTipo,
         inicio: `${t.fechaInicio} ${t.horaInicio}`,
         fin: t.fechaFin ? `${t.fechaFin} ${t.horaFin}` : "Abierto",
-        duracion: t.duracionSegundos,
+        duracion: formatDurationExport(t.duracionSegundos),
         estado: t.estado,
         motivo: t.motivo
       });
@@ -325,30 +331,32 @@ function generatePDF(doc: PDFKit.PDFDocument, type: string, data: any[]) {
   doc.font("Helvetica-Bold").fontSize(9);
 
   if (type === "tickets") {
-    // Columns: Folio(100), Unidad(130), Ciudad(80), Estado(50), Duracion(60), Inicio(100)
+    // Columns: Folio(80), TicketProv(85), Unidad(100), Ciudad(60), Inicio(80), Estado(50), Duracion(80)
     doc.text("Folio", 30, y);
-    doc.text("Unidad", 120, y);
-    doc.text("Ciudad", 240, y);
-    doc.text("Inicio", 320, y);
-    doc.text("Estado", 430, y);
-    doc.text("Duración", 490, y);
+    doc.text("Ticket Prov.", 110, y);
+    doc.text("Unidad", 195, y);
+    doc.text("Ciudad", 295, y);
+    doc.text("Inicio", 355, y);
+    doc.text("Estado", 445, y);
+    doc.text("Duración", 495, y);
 
     y += 15;
     doc.moveTo(30, y).lineTo(560, y).stroke();
     y += 8;
 
-    doc.font("Helvetica").fontSize(8);
+    doc.font("Helvetica").fontSize(7.5);
     data.forEach(t => {
       if (y > 750) {
         doc.addPage();
         y = 50;
       }
       doc.text(t.folio, 30, y);
-      doc.text(t.unidadNombre.substring(0, 22), 120, y);
-      doc.text(t.ciudadNombre, 240, y);
-      doc.text(`${t.fechaInicio} ${t.horaInicio.substring(0, 5)}`, 320, y);
-      doc.text(t.estado, 430, y);
-      doc.text(t.estado === "Abierto" ? "Abierto" : `${Math.round(t.duracionSegundos / 60)} min`, 490, y);
+      doc.text(t.ticketProveedor || "-", 110, y, { width: 80, ellipsis: true });
+      doc.text(t.unidadNombre.substring(0, 16), 195, y);
+      doc.text(t.ciudadNombre, 295, y);
+      doc.text(`${t.fechaInicio} ${t.horaInicio.substring(0, 5)}`, 355, y);
+      doc.text(t.estado, 445, y);
+      doc.text(t.estado === "Abierto" ? "Abierto" : formatDurationExport(t.duracionSegundos), 495, y);
       y += 18;
     });
   } 
@@ -408,4 +416,31 @@ function generatePDF(doc: PDFKit.PDFDocument, type: string, data: any[]) {
       y += 16;
     });
   }
+}
+
+function formatDurationExport(seconds: number): string {
+  if (!seconds || seconds <= 0) return "0 Seg";
+  
+  const days = Math.floor(seconds / (24 * 3600));
+  let remaining = seconds % (24 * 3600);
+  const hours = Math.floor(remaining / 3600);
+  remaining %= 3600;
+  const minutes = Math.floor(remaining / 60);
+  const secs = remaining % 60;
+
+  const parts = [];
+  if (days > 0) {
+    parts.push(`${days} Día${days > 1 ? "s" : ""}`);
+  }
+  if (hours > 0) {
+    parts.push(`${hours} Hrs`);
+  }
+  if (minutes > 0) {
+    parts.push(`${minutes} Min`);
+  }
+  if (secs > 0 || parts.length === 0) {
+    parts.push(`${secs} Seg`);
+  }
+
+  return parts.join(" ");
 }

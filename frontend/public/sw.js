@@ -1,25 +1,22 @@
-const CACHE_NAME = "sme-cache-v1";
-const ASSETS = [
-  "/",
-  "/index.html",
-  "/src/main.tsx",
-  "/src/App.tsx",
-  "/src/index.css",
-  "/manifest.json"
-];
-
 self.addEventListener("install", (e) => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => caches.delete(key))
+      );
+    }).then(() => {
+      return self.clients.claim();
+    }).then(() => {
+      return self.registration.unregister();
     })
   );
 });
 
 self.addEventListener("fetch", (e) => {
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      return cachedResponse || fetch(e.request);
-    })
-  );
+  // Pass through to network
+  e.respondWith(fetch(e.request));
 });

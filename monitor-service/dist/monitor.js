@@ -141,9 +141,12 @@ async function generateFolio(dateStr) {
 async function triggerTicketOpen(unitId, failingIpIds, reason) {
     try {
         const now = new Date();
-        const dateStr = now.toISOString().substring(0, 10); // YYYY-MM-DD
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const dateStr = `${year}-${month}-${day}`; // Local YYYY-MM-DD
         const dateCompact = dateStr.replace(/-/g, ""); // YYYYMMDD
-        const timeStr = now.toTimeString().substring(0, 8); // HH:MM:SS
+        const timeStr = now.toTimeString().substring(0, 8); // Local HH:MM:SS
         const folio = await generateFolio(dateCompact);
         // Create ticket
         const ticketResult = await query.run(`INSERT INTO tickets (folio, unitId, fechaInicio, horaInicio, estado, motivo, creadoAutomaticamente)
@@ -165,8 +168,11 @@ async function triggerTicketOpen(unitId, failingIpIds, reason) {
 async function triggerTicketClose(unitId, openTicketId) {
     try {
         const now = new Date();
-        const dateStr = now.toISOString().substring(0, 10);
-        const timeStr = now.toTimeString().substring(0, 8);
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const dateStr = `${year}-${month}-${day}`; // Local YYYY-MM-DD
+        const timeStr = now.toTimeString().substring(0, 8); // Local HH:MM:SS
         // Retrieve ticket start info to calculate duration
         const ticket = await query.get("SELECT folio, fechaInicio, horaInicio FROM tickets WHERE id = ?", [openTicketId]);
         let durationSeconds = 0;
@@ -334,7 +340,7 @@ async function evaluateUnitTickets(unitId) {
         if (shouldBeOpen && !activeTicket) {
             // Open new ticket
             const failingIpIds = downIps.map(ip => ip.id);
-            const reason = `Caída detectada en enlace(s) crítico(s): ${downIps.map(ip => ip.direccionIP).join(", ")}`;
+            const reason = `[Unidad ID: ${unitId}] Caída detectada en enlace(s) crítico(s): ${downIps.map(ip => ip.direccionIP).join(", ")}`;
             await triggerTicketOpen(unitId, failingIpIds, reason);
         }
         else if (!shouldBeOpen && activeTicket) {

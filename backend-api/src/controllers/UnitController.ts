@@ -3,6 +3,7 @@ import { query } from "../config/db";
 import { logEvent, LogLevel } from "../config/logger";
 import { UnitIPSchema } from "shared";
 import { syncCatalogs } from "../utils/catalogSync";
+import { formatDuration } from "./TicketController";
 
 export class UnitController {
   static async getUnits(req: Request, res: Response) {
@@ -178,13 +179,18 @@ export class UnitController {
         calculatedState = "Monitoreando";
       }
 
+      const mappedTickets = tickets.map((t: any) => ({
+        ...t,
+        duracionLegible: formatDuration(t.duracionSegundos, t.estado === "Abierto", t.fechaInicio, t.horaInicio)
+      }));
+
       res.json({
         ...unit,
         estado: calculatedState,
         disponibilidad,
         rooms,
         ips,
-        tickets
+        tickets: mappedTickets
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -570,12 +576,15 @@ async function calculateAvailability(unitId: number): Promise<number> {
     // Sum total downtime in the last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - daysInMonth);
-    const dateStr = thirtyDaysAgo.toISOString().substring(0, 10);
+    const year = thirtyDaysAgo.getFullYear();
+    const month = String(thirtyDaysAgo.getMonth() + 1).padStart(2, "0");
+    const day = String(thirtyDaysAgo.getDate()).padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
 
     const downtimeRow = await query.get<{ totalDowntime: number }>(
       `SELECT SUM(
         CASE 
-          WHEN fechaFin IS NULL THEN strftime('%s', 'now') - strftime('%s', fechaInicio || ' ' || horaInicio)
+          WHEN fechaFin IS NULL THEN strftime('%s', 'now') - strftime('%s', fechaInicio || ' ' || horaInicio, 'utc')
           ELSE duracionSegundos 
         END
        ) AS totalDowntime

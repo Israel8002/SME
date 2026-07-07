@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TicketController = void 0;
+exports.formatDuration = formatDuration;
 const db_1 = require("../config/db");
 const logger_1 = require("../config/logger");
 class TicketController {
@@ -132,9 +133,12 @@ class TicketController {
             if (ticket.estado === "Cerrado") {
                 return res.status(400).json({ error: "Ticket is already closed" });
             }
-            const nowISO = new Date().toISOString();
-            const today = nowISO.substring(0, 10);
-            const timeNow = nowISO.substring(11, 19);
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const today = `${year}-${month}-${day}`;
+            const timeNow = now.toTimeString().substring(0, 8);
             let duracionSegundos = 0;
             try {
                 const start = new Date(`${ticket.fechaInicio}T${ticket.horaInicio}`);
@@ -197,6 +201,44 @@ class TicketController {
             res.status(500).json({ error: error.message });
         }
     }
+    static async updateTicketProveedor(req, res) {
+        try {
+            const ticketId = parseInt(req.params.id);
+            const { ticketProveedor } = req.body;
+            const ticket = await db_1.query.get("SELECT folio, ticketProveedor FROM tickets WHERE id = ?", [ticketId]);
+            if (!ticket) {
+                return res.status(404).json({ error: "Ticket not found" });
+            }
+            await db_1.query.run("UPDATE tickets SET ticketProveedor = ? WHERE id = ?", [ticketProveedor, ticketId]);
+            await (0, logger_1.logEvent)(logger_1.LogLevel.INFO, "Tickets", "Modificación Proveedor", `Ticket de proveedor actualizado a "${ticketProveedor}" para el folio ${ticket.folio}.`);
+            res.json({ message: "Ticket proveedor actualizado correctamente" });
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+    static async deleteTicketsBulk(req, res) {
+        try {
+            const { ids } = req.body;
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).json({ error: "Missing or invalid ticket IDs" });
+            }
+            const numericIds = ids.map(id => Number(id)).filter(id => !isNaN(id));
+            if (numericIds.length === 0) {
+                return res.status(400).json({ error: "No valid ticket IDs provided" });
+            }
+            const placeholders = numericIds.map(() => "?").join(",");
+            await db_1.query.transaction(async () => {
+                await db_1.query.run(`DELETE FROM ticket_details WHERE ticketId IN (${placeholders})`, numericIds);
+                await db_1.query.run(`DELETE FROM tickets WHERE id IN (${placeholders})`, numericIds);
+            });
+            await (0, logger_1.logEvent)(logger_1.LogLevel.WARNING, "Tickets", "Baja Múltiple", `Se eliminaron ${numericIds.length} tickets en lote.`);
+            res.json({ message: `${numericIds.length} tickets eliminados correctamente` });
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
 }
 exports.TicketController = TicketController;
 function formatDuration(sec, isOpen, startDateStr, startTimeStr) {
@@ -212,7 +254,7 @@ function formatDuration(sec, isOpen, startDateStr, startTimeStr) {
         }
     }
     if (seconds === 0)
-        return "0 segundos";
+        return "0 Seg";
     const days = Math.floor(seconds / (24 * 3600));
     seconds %= (24 * 3600);
     const hours = Math.floor(seconds / 3600);
@@ -220,13 +262,17 @@ function formatDuration(sec, isOpen, startDateStr, startTimeStr) {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     const parts = [];
-    if (days > 0)
-        parts.push(`${days} día${days > 1 ? "s" : ""}`);
-    if (hours > 0)
-        parts.push(`${hours} hora${hours > 1 ? "s" : ""}`);
-    if (minutes > 0)
-        parts.push(`${minutes} minuto${minutes > 1 ? "s" : ""}`);
-    if (secs > 0 || parts.length === 0)
-        parts.push(`${secs} segundo${secs > 1 ? "s" : ""}`);
-    return parts.join(", ");
+    if (days > 0) {
+        parts.push(`${days} Día${days > 1 ? "s" : ""}`);
+    }
+    if (hours > 0) {
+        parts.push(`${hours} Hrs`);
+    }
+    if (minutes > 0) {
+        parts.push(`${minutes} Min`);
+    }
+    if (secs > 0 || parts.length === 0) {
+        parts.push(`${secs} Seg`);
+    }
+    return parts.join(" ");
 }

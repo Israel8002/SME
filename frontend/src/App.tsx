@@ -47,6 +47,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [initialSelectedTicketId, setInitialSelectedTicketId] = useState<number | null>(null);
   
   // State for monitor and summary figures
   const [status, setStatus] = useState<any>({
@@ -172,7 +173,7 @@ export default function App() {
         {/* Sidebar Footer */}
         {sidebarOpen && (
           <div className="p-4 border-t border-[#262626] bg-[#0d0d0d] text-[11px] text-gray-500 text-center">
-            V1.1.0 | LSC Israel Díaz
+            V1.2.0 | LSC Israel Díaz
           </div>
         )}
       </div>
@@ -214,9 +215,24 @@ export default function App() {
 
         {/* WORK AREA */}
         <main className="flex-grow overflow-y-auto p-6">
-          {activeTab === "dashboard" && <DashboardPage status={status} fetchStatus={fetchStatus} setActiveTab={setActiveTab} />}
+          {activeTab === "dashboard" && (
+            <DashboardPage
+              status={status}
+              fetchStatus={fetchStatus}
+              setActiveTab={setActiveTab}
+              openTicketOnTicketsTab={(id) => {
+                setInitialSelectedTicketId(id);
+                setActiveTab("tickets");
+              }}
+            />
+          )}
           {activeTab === "unidades" && <UnitsPage />}
-          {activeTab === "tickets" && <TicketsPage />}
+          {activeTab === "tickets" && (
+            <TicketsPage
+              initialSelectedTicketId={initialSelectedTicketId}
+              setInitialSelectedTicketId={setInitialSelectedTicketId}
+            />
+          )}
           {activeTab === "reportes" && <ReportsPage globalSettings={globalSettings} />}
           {activeTab === "importaciones" && <ImportsPage />}
           {activeTab === "respaldos" && <BackupsPage />}
@@ -232,7 +248,17 @@ export default function App() {
 // ==========================================
 // 1. DASHBOARD PAGE
 // ==========================================
-function DashboardPage({ status, fetchStatus, setActiveTab }: { status: any; fetchStatus: () => void; setActiveTab: (t: string) => void }) {
+function DashboardPage({
+  status,
+  fetchStatus,
+  setActiveTab,
+  openTicketOnTicketsTab
+}: {
+  status: any;
+  fetchStatus: () => void;
+  setActiveTab: (t: string) => void;
+  openTicketOnTicketsTab: (id: number) => void;
+}) {
   const [units, setUnits] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -298,7 +324,12 @@ function DashboardPage({ status, fetchStatus, setActiveTab }: { status: any; fet
               </div>
             ) : (
               tickets.map((t, idx) => (
-                <div key={idx} className="bg-[#181818] border-l-4 border-red-500 p-3 rounded text-xs space-y-1">
+                <div
+                  key={idx}
+                  onClick={() => openTicketOnTicketsTab(t.id)}
+                  className="bg-[#181818] hover:bg-[#222] border-l-4 border-red-500 p-3 rounded text-xs space-y-1 cursor-pointer transition-all duration-100"
+                  title="Haga clic para ver detalles del ticket"
+                >
                   <div className="flex justify-between font-bold">
                     <span className="text-red-400">{t.folio}</span>
                     <span className="text-gray-500 font-mono">{t.fechaInicio}</span>
@@ -1151,7 +1182,7 @@ function UnitsPage() {
                                     </span>
                                   </td>
                                   <td className="p-3 font-mono text-[10px] text-gray-400">
-                                    {t.estado === "Cerrado" ? `${Math.round(t.duracionSegundos / 60)} mins` : "Activo"}
+                                    {t.duracionLegible}
                                   </td>
                                   <td className="p-3 text-gray-300 truncate max-w-xs">{t.motivo}</td>
                                 </tr>
@@ -1359,7 +1390,13 @@ function UnitsPage() {
 // ==========================================
 // 3. HISTORIAL & CONSULTAS PAGE
 // ==========================================
-function TicketsPage() {
+function TicketsPage({
+  initialSelectedTicketId,
+  setInitialSelectedTicketId
+}: {
+  initialSelectedTicketId: number | null;
+  setInitialSelectedTicketId: (id: number | null) => void;
+}) {
   const [tickets, setTickets] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState("");
@@ -1372,6 +1409,21 @@ function TicketsPage() {
 
   // Detail Modal States
   const [selectedTicket, setSelectedTicket] = useState<any | null>(null);
+  const [selectedTicketIds, setSelectedTicketIds] = useState<number[]>([]);
+  const [ticketProveedorInput, setTicketProveedorInput] = useState("");
+
+  useEffect(() => {
+    if (initialSelectedTicketId) {
+      openTicket({ id: initialSelectedTicketId });
+      setInitialSelectedTicketId(null);
+    }
+  }, [initialSelectedTicketId]);
+
+  useEffect(() => {
+    if (selectedTicket) {
+      setTicketProveedorInput(selectedTicket.ticketProveedor || "");
+    }
+  }, [selectedTicket]);
 
   useEffect(() => {
     loadTickets();
@@ -1379,6 +1431,7 @@ function TicketsPage() {
 
   const loadTickets = async () => {
     setLoading(true);
+    setSelectedTicketIds([]);
     try {
       const url = `${API_URL}/api/tickets?search=${encodeURIComponent(search)}&estado=${estado}&cityId=${cityId}&dateStart=${dateStart}&dateEnd=${dateEnd}&page=${page}&limit=15`;
       const res = await fetch(url);
@@ -1486,6 +1539,55 @@ function TicketsPage() {
     }
   };
 
+  const handleSaveTicketProveedor = async () => {
+    if (!selectedTicket) return;
+    try {
+      const res = await fetch(`${API_URL}/api/tickets/${selectedTicket.id}/proveedor`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticketProveedor: ticketProveedorInput.trim() })
+      });
+      if (res.ok) {
+        alert("Ticket Proveedor actualizado correctamente.");
+        setSelectedTicket({
+          ...selectedTicket,
+          ticketProveedor: ticketProveedorInput.trim()
+        });
+        loadTickets();
+      } else {
+        alert("Error al guardar el ticket de proveedor.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error de red al guardar el ticket de proveedor.");
+    }
+  };
+
+  const handleDeleteSelectedTickets = async () => {
+    if (selectedTicketIds.length === 0) return;
+    if (!confirm(`¿Está seguro de eliminar permanentemente los ${selectedTicketIds.length} tickets seleccionados? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/tickets/bulk-delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedTicketIds })
+      });
+      if (res.ok) {
+        alert("Tickets eliminados exitosamente.");
+        setSelectedTicketIds([]);
+        loadTickets();
+      } else {
+        alert("Error al eliminar los tickets seleccionados.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error de red al eliminar los tickets.");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* FILTERS PANEL */}
@@ -1539,13 +1641,24 @@ function TicketsPage() {
             />
           </div>
         </div>
-        <button
-          onClick={handleDeleteRange}
-          className="w-full xl:w-auto shrink-0 bg-red-600/10 text-red-500 border border-red-600/20 hover:bg-red-600/25 px-4 py-2 rounded font-bold transition-all duration-100 flex items-center justify-center text-xs"
-        >
-          <Trash2 className="h-4 w-4 mr-1.5" />
-          Borrar por Rango
-        </button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full xl:w-auto shrink-0">
+          {selectedTicketIds.length > 0 && (
+            <button
+              onClick={handleDeleteSelectedTickets}
+              className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold transition-all duration-100 flex items-center justify-center text-xs"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Borrar Seleccionados ({selectedTicketIds.length})
+            </button>
+          )}
+          <button
+            onClick={handleDeleteRange}
+            className="w-full sm:w-auto bg-red-600/10 text-red-500 border border-red-600/20 hover:bg-red-600/25 px-4 py-2 rounded font-bold transition-all duration-100 flex items-center justify-center text-xs"
+          >
+            <Trash2 className="h-4 w-4 mr-1.5" />
+            Borrar por Rango
+          </button>
+        </div>
       </div>
 
       {/* TICKETS TABLE */}
@@ -1554,6 +1667,20 @@ function TicketsPage() {
           <table className="w-full text-xs text-left">
             <thead className="bg-[#0f0f0f] border-b border-[#262626] text-gray-400 font-mono uppercase tracking-wider">
               <tr>
+                <th className="p-3 w-10">
+                  <input
+                    type="checkbox"
+                    checked={tickets.length > 0 && selectedTicketIds.length === tickets.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedTicketIds(tickets.map(t => t.id));
+                      } else {
+                        setSelectedTicketIds([]);
+                      }
+                    }}
+                    className="rounded bg-[#1c1c1c] border-[#262626] text-[#1e88e5] focus:ring-0 cursor-pointer"
+                  />
+                </th>
                 <th className="p-3">Folio</th>
                 <th className="p-3">Unidad</th>
                 <th className="p-3">Ciudad</th>
@@ -1567,15 +1694,29 @@ function TicketsPage() {
             <tbody className="divide-y divide-[#262626]">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="p-6 text-center text-gray-500">Cargando bitácora de tickets...</td>
+                  <td colSpan={9} className="p-6 text-center text-gray-500">Cargando bitácora de tickets...</td>
                 </tr>
               ) : tickets.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-6 text-center text-gray-500">No se encontraron tickets con los filtros aplicados.</td>
+                  <td colSpan={9} className="p-6 text-center text-gray-500">No se encontraron tickets con los filtros aplicados.</td>
                 </tr>
               ) : (
                 tickets.map((t, idx) => (
                   <tr key={idx} className="hover:bg-[#181818] transition-colors duration-100">
+                    <td className="p-3 w-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedTicketIds.includes(t.id)}
+                        onChange={() => {
+                          if (selectedTicketIds.includes(t.id)) {
+                            setSelectedTicketIds(selectedTicketIds.filter(id => id !== t.id));
+                          } else {
+                            setSelectedTicketIds([...selectedTicketIds, t.id]);
+                          }
+                        }}
+                        className="rounded bg-[#1c1c1c] border-[#262626] text-[#1e88e5] focus:ring-0 cursor-pointer"
+                      />
+                    </td>
                     <td className="p-3 font-mono text-[#1e88e5] font-bold">{t.folio}</td>
                     <td className="p-3 font-semibold">{t.unidadNombre}</td>
                     <td className="p-3">{t.ciudadNombre}</td>
@@ -1655,7 +1796,7 @@ function TicketsPage() {
               <div className="bg-[#181818] p-4 rounded space-y-2 font-mono text-[11px]">
                 <div className="flex justify-between border-b border-[#262626] pb-1">
                   <span className="text-gray-500">Unidad Afectada:</span>
-                  <span className="text-gray-300 font-bold">{selectedTicket.unidadNombre} ({selectedTicket.unidadTipo})</span>
+                  <span className="text-gray-300 font-bold">{selectedTicket.unidadNombre} ({selectedTicket.unidadTipo}) - ID: {selectedTicket.unitId}</span>
                 </div>
                 <div className="flex justify-between border-b border-[#262626] pb-1">
                   <span className="text-gray-500">Ciudad:</span>
@@ -1677,12 +1818,37 @@ function TicketsPage() {
                   <span className="text-gray-500">Generación:</span>
                   <span className="text-gray-500">{selectedTicket.creadoAutomaticamente === 1 ? "Automático (Monitor)" : "Manual"}</span>
                 </div>
+                {selectedTicket.ticketProveedor && (
+                  <div className="flex justify-between border-t border-[#262626] pt-1 mt-1">
+                    <span className="text-gray-500">Ticket Proveedor:</span>
+                    <span className="text-[#1e88e5] font-bold font-mono">{selectedTicket.ticketProveedor}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <span className="font-bold text-gray-400 uppercase tracking-wider text-[10px]">Causa e Impacto</span>
                 <div className="bg-[#0f0f0f] border border-[#262626] p-3 rounded text-gray-300">
                   {selectedTicket.motivo}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <span className="font-bold text-gray-400 uppercase tracking-wider text-[10px]">Ticket Proveedor</span>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={ticketProveedorInput}
+                    onChange={(e) => setTicketProveedorInput(e.target.value)}
+                    placeholder="Ej. TKT-82931-PROV"
+                    className="flex-grow bg-[#0f0f0f] border border-[#262626] rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#1e88e5]"
+                  />
+                  <button
+                    onClick={handleSaveTicketProveedor}
+                    className="bg-[#1e88e5] hover:bg-[#1565c0] text-white px-4 py-1.5 rounded font-bold text-xs transition-colors shrink-0 font-sans"
+                  >
+                    Guardar
+                  </button>
                 </div>
               </div>
 
@@ -2386,47 +2552,78 @@ function LogsPage() {
     }
   };
 
+  const handleClearLogs = async () => {
+    if (!confirm("¿Está seguro de eliminar permanentemente TODOS los registros de la bitácora? Esta acción no se puede deshacer.")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/logs`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        alert("Bitácora de logs limpiada correctamente.");
+        setPage(1);
+        loadLogs();
+      } else {
+        alert("Error al limpiar la bitácora.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error de red al intentar limpiar los logs.");
+    }
+  };
+
   return (
     <div className="space-y-6 text-xs">
       {/* FILTER HEADER */}
-      <div className="bg-[#121212] p-4 border border-[#262626] rounded flex flex-col md:flex-row gap-4">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Buscar en descripción de eventos..."
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full bg-[#1c1c1c] border border-[#262626] rounded pl-9 pr-4 py-2 text-xs text-white focus:outline-none"
-          />
+      <div className="bg-[#121212] p-4 border border-[#262626] rounded flex flex-col lg:flex-row gap-4 items-center justify-between">
+        <div className="flex flex-col md:flex-row gap-4 flex-grow w-full lg:w-auto">
+          <div className="relative flex-grow">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Buscar en descripción de eventos..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="w-full bg-[#1c1c1c] border border-[#262626] rounded pl-9 pr-4 py-2 text-xs text-white focus:outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2 w-full md:w-[350px]">
+            <select
+              value={nivel}
+              onChange={(e) => { setNivel(e.target.value); setPage(1); }}
+              className="bg-[#1c1c1c] border border-[#262626] rounded p-2 text-xs text-white focus:outline-none"
+            >
+              <option value="">Todos los niveles</option>
+              <option value="DEBUG">DEBUG</option>
+              <option value="INFO">INFO</option>
+              <option value="WARNING">WARNING</option>
+              <option value="ERROR">ERROR</option>
+              <option value="CRITICAL">CRITICAL</option>
+            </select>
+            <select
+              value={modulo}
+              onChange={(e) => { setModulo(e.target.value); setPage(1); }}
+              className="bg-[#1c1c1c] border border-[#262626] rounded p-2 text-xs text-white focus:outline-none"
+            >
+              <option value="">Todos los módulos</option>
+              <option value="Servicio Monitor">Servicio Monitor</option>
+              <option value="API">API</option>
+              <option value="Configuración">Configuración</option>
+              <option value="Importación">Importación</option>
+              <option value="Respaldos">Respaldos</option>
+              <option value="Tickets">Tickets</option>
+            </select>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 w-full md:w-[350px]">
-          <select
-            value={nivel}
-            onChange={(e) => { setNivel(e.target.value); setPage(1); }}
-            className="bg-[#1c1c1c] border border-[#262626] rounded p-2 text-xs text-white focus:outline-none"
-          >
-            <option value="">Todos los niveles</option>
-            <option value="DEBUG">DEBUG</option>
-            <option value="INFO">INFO</option>
-            <option value="WARNING">WARNING</option>
-            <option value="ERROR">ERROR</option>
-            <option value="CRITICAL">CRITICAL</option>
-          </select>
-          <select
-            value={modulo}
-            onChange={(e) => { setModulo(e.target.value); setPage(1); }}
-            className="bg-[#1c1c1c] border border-[#262626] rounded p-2 text-xs text-white focus:outline-none"
-          >
-            <option value="">Todos los módulos</option>
-            <option value="Servicio Monitor">Servicio Monitor</option>
-            <option value="API">API</option>
-            <option value="Configuración">Configuración</option>
-            <option value="Importación">Importación</option>
-            <option value="Respaldos">Respaldos</option>
-            <option value="Tickets">Tickets</option>
-          </select>
-        </div>
+        <button
+          onClick={handleClearLogs}
+          className="w-full lg:w-auto shrink-0 bg-red-600/10 text-red-500 border border-red-600/20 hover:bg-red-600/25 px-4 py-2 rounded font-bold transition-all duration-100 flex items-center justify-center text-xs"
+        >
+          <Trash2 className="h-4 w-4 mr-1.5" />
+          Limpiar Bitácora
+        </button>
       </div>
 
       {/* LOGS LIST */}
@@ -2490,7 +2687,7 @@ function AboutPage({ status }: { status: any }) {
       <div className="text-center space-y-2">
         <Activity className="h-12 w-12 text-[#1e88e5] mx-auto animate-pulse" />
         <h3 className="font-bold text-sm text-white uppercase tracking-wider">Sistema de Monitoreo de Enlaces</h3>
-        <p className="text-gray-500 font-mono text-[10px]">Versión 1.1.0 (Local Build)</p>
+        <p className="text-gray-500 font-mono text-[10px]">Versión 1.2.0 (Local Build)</p>
       </div>
 
       <div className="border-t border-[#262626] pt-4 space-y-3 leading-relaxed text-gray-300">

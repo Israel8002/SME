@@ -54,7 +54,10 @@ class BackupController {
     }
     static async createBackup(req, res) {
         const now = new Date();
-        const dateStr = now.toISOString().substring(0, 10); // YYYY-MM-DD
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`; // Local YYYY-MM-DD
         const timeStr = now.toTimeString().substring(0, 8).replace(/:/g, ""); // HHMMSS
         const filename = `SME_Backup_${dateStr}_${timeStr}.zip`;
         const destPath = path.join(BACKUPS_DIR, filename);
@@ -73,7 +76,7 @@ class BackupController {
                 if (fs.existsSync(tempCopyPath)) {
                     fs.unlinkSync(tempCopyPath);
                 }
-                const today = now.toISOString().substring(0, 10);
+                const today = dateStr;
                 const timeNow = now.toTimeString().substring(0, 8);
                 if (err) {
                     console.error("Backup compression error:", err.message);

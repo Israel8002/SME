@@ -21,6 +21,13 @@ export const db = new sqlite3.Database(DB_PATH, (err) => {
       db.run("PRAGMA foreign_keys = ON;");
       db.run("PRAGMA journal_mode = WAL;");
       db.run("PRAGMA busy_timeout = 5000;");
+      
+      // Auto-migration for ticketProveedor column
+      db.run("ALTER TABLE tickets ADD COLUMN ticketProveedor TEXT NULL;", (alterErr) => {
+        if (alterErr && !alterErr.message.includes("duplicate column name")) {
+          console.error("Failed to add ticketProveedor column:", alterErr.message);
+        }
+      });
     });
     console.log("Connected to SQLite database successfully (WAL enabled).");
   }

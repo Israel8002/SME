@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS tickets (
     estado TEXT NOT NULL DEFAULT 'Abierto' CHECK(estado IN ('Abierto', 'Cerrado')),
     motivo TEXT NOT NULL,
     observaciones TEXT NULL,
+    ticketProveedor TEXT NULL,
     creadoAutomaticamente INTEGER NOT NULL DEFAULT 1,
     FOREIGN KEY (unitId) REFERENCES units(id) ON DELETE RESTRICT
 );

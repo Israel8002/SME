@@ -73,10 +73,13 @@ app.delete("/api/units/:id/rooms/:roomId", UnitController_1.UnitController.delet
 app.get("/api/tickets", TicketController_1.TicketController.getTickets);
 app.get("/api/tickets/:id", TicketController_1.TicketController.getTicketDetail);
 app.post("/api/tickets/:id/close", TicketController_1.TicketController.closeTicket);
+app.put("/api/tickets/:id/proveedor", TicketController_1.TicketController.updateTicketProveedor);
+app.post("/api/tickets/bulk-delete", TicketController_1.TicketController.deleteTicketsBulk);
 app.delete("/api/tickets", TicketController_1.TicketController.deleteTicketsByRange);
 app.delete("/api/tickets/:id", TicketController_1.TicketController.deleteTicket);
 // --- Logs Endpoints ---
 app.get("/api/logs", LogController_1.LogController.getLogs);
+app.delete("/api/logs", LogController_1.LogController.clearLogs);
 // --- Import Endpoints ---
 app.get("/api/imports", ImportController_1.ImportController.getImportHistory);
 app.post("/api/imports", ImportController_1.ImportController.importCatalogs);
@@ -98,7 +101,11 @@ app.get("/api/status", async (req, res) => {
         // Units with open tickets (incidents)
         const openTickets = await db_1.query.get("SELECT COUNT(*) AS count FROM tickets WHERE estado = 'Abierto'");
         // Tickets closed today
-        const today = new Date().toISOString().substring(0, 10);
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const today = `${year}-${month}-${day}`;
         const closedToday = await db_1.query.get("SELECT COUNT(*) AS count FROM tickets WHERE estado = 'Cerrado' AND fechaFin = ?", [today]);
         // Availability Average
         const availabilityRow = await db_1.query.all(`
@@ -141,10 +148,10 @@ app.get("/api/status", async (req, res) => {
     }
 });
 // Serve Frontend Static Files
-const frontendDistPath = path.resolve(__dirname, "../../../frontend/dist");
+const frontendDistPath = path.resolve(__dirname, "../../frontend/dist");
 app.use(express_1.default.static(frontendDistPath));
 app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api")) {
+    if (req.path.startsWith("/api") || req.path.includes(".")) {
         return next();
     }
     res.sendFile(path.join(frontendDistPath, "index.html"));

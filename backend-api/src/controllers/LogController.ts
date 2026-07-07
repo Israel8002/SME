@@ -67,4 +67,21 @@ export class LogController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  static async clearLogs(req: Request, res: Response) {
+    try {
+      await query.run("DELETE FROM logs");
+      
+      const timestamp = new Date().toISOString();
+      await query.run(
+        `INSERT INTO logs (fechaHora, nivel, modulo, evento, descripcion, usuario, ipEquipo, versionSistema)
+         VALUES (?, 'INFO', 'Logs', 'Depuración', 'Limpieza general de logs realizada por el administrador.', 'Administrador', '127.0.0.1', '1.2.0')`,
+        [timestamp]
+      );
+
+      res.json({ message: "Logs limpiados exitosamente" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
