@@ -5,6 +5,7 @@ import ExcelJS from "exceljs";
 import PDFDocument from "pdfkit";
 import * as path from "path";
 import * as fs from "fs";
+import { formatDuration } from "./TicketController";
 
 const WORKSPACE_DIR = path.resolve(__dirname, "../../../");
 const EXPORTS_DIR = path.join(WORKSPACE_DIR, "exports");
@@ -331,14 +332,14 @@ function generatePDF(doc: PDFKit.PDFDocument, type: string, data: any[]) {
   doc.font("Helvetica-Bold").fontSize(9);
 
   if (type === "tickets") {
-    // Columns: Folio(80), TicketProv(85), Unidad(100), Ciudad(60), Inicio(80), Estado(50), Duracion(80)
+    // Columns: Folio(80), Unidad(120), Ciudad(60), Inicio(85), Estado(50), Duracion(65), TicketProv(70)
     doc.text("Folio", 30, y);
-    doc.text("Ticket Prov.", 110, y);
-    doc.text("Unidad", 195, y);
-    doc.text("Ciudad", 295, y);
-    doc.text("Inicio", 355, y);
-    doc.text("Estado", 445, y);
-    doc.text("Duración", 495, y);
+    doc.text("Unidad", 110, y);
+    doc.text("Ciudad", 230, y);
+    doc.text("Inicio", 290, y);
+    doc.text("Estado", 375, y);
+    doc.text("Duración", 425, y);
+    doc.text("Ticket Prov.", 490, y);
 
     y += 15;
     doc.moveTo(30, y).lineTo(560, y).stroke();
@@ -350,13 +351,15 @@ function generatePDF(doc: PDFKit.PDFDocument, type: string, data: any[]) {
         doc.addPage();
         y = 50;
       }
+      const durationText = formatDuration(t.duracionSegundos, t.estado === "Abierto", t.fechaInicio, t.horaInicio);
+
       doc.text(t.folio, 30, y);
-      doc.text(t.ticketProveedor || "-", 110, y, { width: 80, ellipsis: true });
-      doc.text(t.unidadNombre.substring(0, 16), 195, y);
-      doc.text(t.ciudadNombre, 295, y);
-      doc.text(`${t.fechaInicio} ${t.horaInicio.substring(0, 5)}`, 355, y);
-      doc.text(t.estado, 445, y);
-      doc.text(t.estado === "Abierto" ? "Abierto" : formatDurationExport(t.duracionSegundos), 495, y);
+      doc.text(t.unidadNombre.substring(0, 20), 110, y, { width: 115, ellipsis: true });
+      doc.text(t.ciudadNombre, 230, y, { width: 55, ellipsis: true });
+      doc.text(`${t.fechaInicio} ${t.horaInicio.substring(0, 5)}`, 290, y);
+      doc.text(t.estado, 375, y);
+      doc.text(durationText, 425, y, { width: 60, ellipsis: true });
+      doc.text(t.ticketProveedor || "-", 490, y, { width: 70, ellipsis: true });
       y += 18;
     });
   } 
