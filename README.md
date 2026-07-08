@@ -306,7 +306,7 @@ Especialista en
 
 **Sistema de Monitoreo de Enlaces (SME)**
 
-Desarrollado con ❤️ para la gestión profesional de infraestructura de telecomunicaciones.
+Desarrollado para la gestión profesional de infraestructura de telecomunicaciones.
 
 © 2026 LSC Israel Díaz Serrano
 
