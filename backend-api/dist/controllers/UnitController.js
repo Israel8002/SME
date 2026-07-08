@@ -6,6 +6,7 @@ const logger_1 = require("../config/logger");
 const shared_1 = require("shared");
 const catalogSync_1 = require("../utils/catalogSync");
 const TicketController_1 = require("./TicketController");
+const child_process_1 = require("child_process");
 class UnitController {
     static async getUnits(req, res) {
         try {
@@ -140,8 +141,14 @@ class UnitController {
             }
             // Fetch Rooms
             const rooms = await db_1.query.all("SELECT * FROM rooms WHERE unitId = ?", [unitId]);
-            // Fetch IPs
-            const ips = await db_1.query.all("SELECT * FROM unit_ips WHERE unitId = ?", [unitId]);
+            // Fetch IPs with last ping status and latency from ping_history
+            const ips = await db_1.query.all(`SELECT ip.*,
+                (SELECT resultado FROM ping_history WHERE ipId = ip.id ORDER BY id DESC LIMIT 1) AS ultimoResultado,
+                (SELECT latencia FROM ping_history WHERE ipId = ip.id ORDER BY id DESC LIMIT 1) AS ultimaLatencia,
+                (SELECT fechaHora FROM ping_history WHERE ipId = ip.id ORDER BY id DESC LIMIT 1) AS ultimoPingFechaHora
+         FROM unit_ips ip
+         WHERE ip.unitId = ?
+         ORDER BY ip.id DESC`, [unitId]);
             // Fetch Recent Tickets (limit 10)
             const tickets = await db_1.query.all("SELECT * FROM tickets WHERE unitId = ? ORDER BY id DESC LIMIT 10", [unitId]);
             // Fetch availability
@@ -402,6 +409,75 @@ class UnitController {
             res.status(500).json({ error: error.message });
         }
     }
+    static async checkUnitIp(req, res) {
+        try {
+            const unitId = parseInt(req.params.id);
+            const ipId = parseInt(req.params.ipId);
+            const ipInfo = await db_1.query.get("SELECT id, direccionIP, descripcion, timeout FROM unit_ips WHERE id = ? AND unitId = ?", [ipId, unitId]);
+            if (!ipInfo) {
+                return res.status(404).json({ error: "IP not found for this unit" });
+            }
+            // Fetch global timeout setting if not specified on IP
+            const settings = await db_1.query.get("SELECT timeout FROM settings WHERE id = 1");
+            const timeout = ipInfo.timeout || (settings ? settings.timeout : 1000);
+            // Ping
+            const pingResult = await PingExecutor.ping(ipInfo.direccionIP, timeout);
+            // Save to history
+            const nowISO = new Date().toISOString();
+            await db_1.query.run(`INSERT INTO ping_history (ipId, fechaHora, resultado, latencia, mensajeError)
+         VALUES (?, ?, ?, ?, ?)`, [ipInfo.id, nowISO, pingResult.status, pingResult.latency, pingResult.errorMsg]);
+            // Evaluate ticket status
+            await evaluateUnitTicketsDb(unitId, ipInfo.id, pingResult.status, ipInfo.direccionIP, ipInfo.descripcion);
+            res.json({
+                success: true,
+                status: pingResult.status,
+                latency: pingResult.latency,
+                errorMsg: pingResult.errorMsg
+            });
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+    static async checkAllUnitIps(req, res) {
+        try {
+            const unitId = parseInt(req.params.id);
+            const unit = await db_1.query.get("SELECT id FROM units WHERE id = ?", [unitId]);
+            if (!unit) {
+                return res.status(404).json({ error: "Unit not found" });
+            }
+            const ips = await db_1.query.all("SELECT id, direccionIP, descripcion, timeout, esCritica FROM unit_ips WHERE unitId = ? AND activa = 1", [unitId]);
+            if (ips.length === 0) {
+                return res.json({ success: true, checked: 0, results: [] });
+            }
+            const settings = await db_1.query.get("SELECT timeout FROM settings WHERE id = 1");
+            const defTimeout = settings ? settings.timeout : 1000;
+            const results = [];
+            for (const ip of ips) {
+                const timeout = ip.timeout || defTimeout;
+                const pingResult = await PingExecutor.ping(ip.direccionIP, timeout);
+                const nowISO = new Date().toISOString();
+                await db_1.query.run(`INSERT INTO ping_history (ipId, fechaHora, resultado, latencia, mensajeError)
+           VALUES (?, ?, ?, ?, ?)`, [ip.id, nowISO, pingResult.status, pingResult.latency, pingResult.errorMsg]);
+                await evaluateUnitTicketsDb(unitId, ip.id, pingResult.status, ip.direccionIP, ip.descripcion);
+                results.push({
+                    ipId: ip.id,
+                    direccionIP: ip.direccionIP,
+                    status: pingResult.status,
+                    latency: pingResult.latency,
+                    errorMsg: pingResult.errorMsg
+                });
+            }
+            res.json({
+                success: true,
+                checked: ips.length,
+                results
+            });
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
 }
 exports.UnitController = UnitController;
 // Utility function to calculate availability
@@ -432,5 +508,152 @@ async function calculateAvailability(unitId) {
     }
     catch {
         return 100.00;
+    }
+}
+class PingExecutor {
+    static ping(ip, timeoutMs = 1000) {
+        return new Promise((resolve) => {
+            const process = (0, child_process_1.spawn)("ping.exe", ["-n", "1", "-w", timeoutMs.toString(), ip]);
+            let stdoutData = "";
+            let stderrData = "";
+            process.stdout.on("data", (data) => {
+                stdoutData += data.toString("latin1");
+            });
+            process.stderr.on("data", (data) => {
+                stderrData += data.toString();
+            });
+            process.on("close", (code) => {
+                if (code !== 0 && stderrData.length > 0) {
+                    return resolve({
+                        status: "OFFLINE",
+                        latency: null,
+                        errorMsg: `Execution error: ${stderrData.trim()}`
+                    });
+                }
+                const latencyMatch = stdoutData.match(/(?:tiempo|time)(?:=|<)(\d+)ms/i);
+                if (latencyMatch) {
+                    const latency = parseInt(latencyMatch[1]);
+                    return resolve({
+                        status: "ONLINE",
+                        latency: latency === 0 ? 1 : latency,
+                        errorMsg: null
+                    });
+                }
+                let errorMsg = "Falla de comunicación";
+                if (stdoutData.toLowerCase().includes("espera agotado") || stdoutData.toLowerCase().includes("timed out")) {
+                    errorMsg = "Timeout";
+                }
+                else if (stdoutData.toLowerCase().includes("inaccesible") || stdoutData.toLowerCase().includes("unreachable")) {
+                    errorMsg = "Host inaccesible";
+                }
+                else if (stdoutData.toLowerCase().includes("desconocido") || stdoutData.toLowerCase().includes("unknown")) {
+                    errorMsg = "Destino desconocido";
+                }
+                else {
+                    const lines = stdoutData.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+                    const errorLine = lines.find(l => l.includes("perdid") || l.includes("lost") || l.includes("error") || l.includes("fallo"));
+                    if (errorLine) {
+                        errorMsg = errorLine;
+                    }
+                }
+                resolve({
+                    status: "OFFLINE",
+                    latency: null,
+                    errorMsg
+                });
+            });
+        });
+    }
+}
+async function generateFolio(dateStr) {
+    const year = dateStr.substring(0, 4);
+    const pattern = `SME-${year}%`;
+    const maxRow = await db_1.query.get(`SELECT folio AS maxFolio FROM tickets 
+     WHERE folio LIKE ? 
+     ORDER BY id DESC LIMIT 1`, [pattern]);
+    let nextSeq = 1;
+    if (maxRow && maxRow.maxFolio) {
+        const parts = maxRow.maxFolio.split("-");
+        const lastSeq = parseInt(parts[2]);
+        if (!isNaN(lastSeq)) {
+            nextSeq = lastSeq + 1;
+        }
+    }
+    const seqStr = nextSeq.toString().padStart(6, "0");
+    return `SME-${dateStr}-${seqStr}`;
+}
+async function evaluateUnitTicketsDb(unitId, checkedIpId, pingResult, ipAddress, ipDesc) {
+    // 1. Fetch active ticket for the unit
+    const activeTicket = await db_1.query.get("SELECT id, folio FROM tickets WHERE unitId = ? AND estado = 'Abierto'", [unitId]);
+    // 2. If pingResult is OFFLINE:
+    if (pingResult === "OFFLINE") {
+        if (!activeTicket) {
+            // Create new ticket
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, "0");
+            const day = String(now.getDate()).padStart(2, "0");
+            const dateStr = `${year}-${month}-${day}`;
+            const dateCompact = dateStr.replace(/-/g, "");
+            const timeStr = now.toTimeString().substring(0, 8);
+            const folio = await generateFolio(dateCompact);
+            const reason = `[Manual] Caída detectada en enlace: ${ipAddress} (${ipDesc})`;
+            const ticketResult = await db_1.query.run(`INSERT INTO tickets (folio, unitId, fechaInicio, horaInicio, estado, motivo, creadoAutomaticamente)
+         VALUES (?, ?, ?, ?, 'Abierto', ?, 1)`, [folio, unitId, dateStr, timeStr, reason]);
+            const ticketId = ticketResult.lastID;
+            await db_1.query.run(`INSERT INTO ticket_details (ticketId, ipId, descripcion, estadoInicial, estadoFinal)
+         VALUES (?, ?, ?, 'OFFLINE', NULL)`, [ticketId, checkedIpId, ipDesc]);
+            await (0, logger_1.logEvent)(logger_1.LogLevel.WARNING, "Tickets", "Apertura Ticket", `Ticket autogenerado manualmente con Folio ${folio} para unidad ID ${unitId} por caída de IP ${ipAddress}.`);
+        }
+        else {
+            // There is an active ticket, check if this IP is already in its details
+            const existingDetail = await db_1.query.get("SELECT id FROM ticket_details WHERE ticketId = ? AND ipId = ?", [activeTicket.id, checkedIpId]);
+            if (!existingDetail) {
+                await db_1.query.run(`INSERT INTO ticket_details (ticketId, ipId, descripcion, estadoInicial, estadoFinal)
+           VALUES (?, ?, ?, 'OFFLINE', NULL)`, [activeTicket.id, checkedIpId, ipDesc]);
+            }
+        }
+    }
+    else {
+        // If pingResult is ONLINE, and there is an active ticket:
+        if (activeTicket) {
+            // Mark this IP as ONLINE in ticket_details if it was recorded
+            await db_1.query.run(`UPDATE ticket_details SET estadoFinal = 'ONLINE' WHERE ticketId = ? AND ipId = ? AND estadoFinal IS NULL`, [activeTicket.id, checkedIpId]);
+            // Check if ALL critical IPs of the unit are ONLINE
+            const criticalIps = await db_1.query.all("SELECT id FROM unit_ips WHERE unitId = ? AND activa = 1 AND esCritica = 1", [unitId]);
+            let allCriticalIpsUp = true;
+            for (const critIp of criticalIps) {
+                const lastPing = await db_1.query.get("SELECT resultado FROM ping_history WHERE ipId = ? ORDER BY id DESC LIMIT 1", [critIp.id]);
+                if (!lastPing || lastPing.resultado === "OFFLINE") {
+                    allCriticalIpsUp = false;
+                    break;
+                }
+            }
+            if (allCriticalIpsUp) {
+                // Close the ticket!
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, "0");
+                const day = String(now.getDate()).padStart(2, "0");
+                const dateStr = `${year}-${month}-${day}`;
+                const timeStr = now.toTimeString().substring(0, 8);
+                let duracionSegundos = 0;
+                const ticketInfo = await db_1.query.get("SELECT fechaInicio, horaInicio, folio FROM tickets WHERE id = ?", [activeTicket.id]);
+                if (ticketInfo) {
+                    try {
+                        const start = new Date(`${ticketInfo.fechaInicio}T${ticketInfo.horaInicio}`);
+                        duracionSegundos = Math.max(0, Math.floor((now.getTime() - start.getTime()) / 1000));
+                    }
+                    catch (e) {
+                        console.error(e);
+                    }
+                }
+                await db_1.query.transaction(async () => {
+                    await db_1.query.run(`UPDATE ticket_details SET estadoFinal = 'ONLINE' WHERE ticketId = ? AND estadoFinal IS NULL`, [activeTicket.id]);
+                    await db_1.query.run(`UPDATE tickets SET estado = 'Cerrado', fechaFin = ?, horaFin = ?, duracionSegundos = ? WHERE id = ?`, [dateStr, timeStr, duracionSegundos, activeTicket.id]);
+                });
+                await (0, logger_1.logEvent)(logger_1.LogLevel.INFO, "Tickets", "Cierre Ticket", `Ticket Folio ${ticketInfo?.folio || activeTicket.folio} cerrado automáticamente tras recuperación manual del enlace.`);
+            }
+        }
     }
 }

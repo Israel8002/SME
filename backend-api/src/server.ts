@@ -36,6 +36,8 @@ app.delete("/api/units/:id", UnitController.deleteUnit);
 app.post("/api/units", UnitController.createUnit);
 app.post("/api/units/:id/rooms", UnitController.createRoom);
 app.delete("/api/units/:id/rooms/:roomId", UnitController.deleteRoom);
+app.post("/api/units/:id/ips/:ipId/check", UnitController.checkUnitIp);
+app.post("/api/units/:id/check-ips", UnitController.checkAllUnitIps);
 
 // --- Tickets Endpoints ---
 app.get("/api/tickets", TicketController.getTickets);

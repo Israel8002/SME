@@ -69,6 +69,8 @@ app.delete("/api/units/:id", UnitController_1.UnitController.deleteUnit);
 app.post("/api/units", UnitController_1.UnitController.createUnit);
 app.post("/api/units/:id/rooms", UnitController_1.UnitController.createRoom);
 app.delete("/api/units/:id/rooms/:roomId", UnitController_1.UnitController.deleteRoom);
+app.post("/api/units/:id/ips/:ipId/check", UnitController_1.UnitController.checkUnitIp);
+app.post("/api/units/:id/check-ips", UnitController_1.UnitController.checkAllUnitIps);
 // --- Tickets Endpoints ---
 app.get("/api/tickets", TicketController_1.TicketController.getTickets);
 app.get("/api/tickets/:id", TicketController_1.TicketController.getTicketDetail);

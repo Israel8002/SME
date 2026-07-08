@@ -48,7 +48,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [initialSelectedTicketId, setInitialSelectedTicketId] = useState<number | null>(null);
-  
+
   // State for monitor and summary figures
   const [status, setStatus] = useState<any>({
     monitor: { estado: "Cargando...", version: "1.0.0", ipsMonitoreadas: 0, cpu: 0, memoria: 0 },
@@ -73,7 +73,7 @@ export default function App() {
 
     // Clock interval
     const clockTimer = setInterval(() => setCurrentTime(new Date()), 1000);
-    
+
     // Initial fetches
     fetchStatus();
     fetchSettings();
@@ -116,9 +116,8 @@ export default function App() {
     <div className="flex h-screen bg-[#050505] text-[#f3f4f6] font-sans overflow-hidden">
       {/* SIDEBAR */}
       <div
-        className={`${
-          sidebarOpen ? "w-64" : "w-16"
-        } transition-all duration-300 bg-[#121212] border-r border-[#262626] flex flex-col z-20 h-full`}
+        className={`${sidebarOpen ? "w-64" : "w-16"
+          } transition-all duration-300 bg-[#121212] border-r border-[#262626] flex flex-col z-20 h-full`}
       >
         {/* Sidebar Header */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-[#262626]">
@@ -157,11 +156,10 @@ export default function App() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center px-4 py-3 text-sm transition-colors duration-150 ${
-                  active
-                    ? "bg-[#1e88e5]/10 text-white border-l-4 border-[#1e88e5] font-semibold"
-                    : "text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-200 border-l-4 border-transparent"
-                }`}
+                className={`w-full flex items-center px-4 py-3 text-sm transition-colors duration-150 ${active
+                  ? "bg-[#1e88e5]/10 text-white border-l-4 border-[#1e88e5] font-semibold"
+                  : "text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-200 border-l-4 border-transparent"
+                  }`}
               >
                 <Icon className={`h-5 w-5 ${active ? "text-[#1e88e5]" : "text-gray-400"} ${sidebarOpen ? "mr-3" : "mx-auto"}`} />
                 {sidebarOpen && <span>{item.label}</span>}
@@ -188,16 +186,15 @@ export default function App() {
             <div className="flex items-center space-x-2">
               <span className="text-[11px] text-gray-500 uppercase tracking-widest">Servicio:</span>
               <span
-                className={`h-2.5 w-2.5 rounded-full inline-block ${
-                  status.monitor?.estado === "OPERANDO" ? "bg-green-500 animate-pulse" : "bg-red-500"
-                }`}
+                className={`h-2.5 w-2.5 rounded-full inline-block ${status.monitor?.estado === "OPERANDO" ? "bg-green-500 animate-pulse" : "bg-red-500"
+                  }`}
               ></span>
               <span className="text-xs font-semibold text-gray-300">
                 {status.monitor?.estado || "DESCONOCIDO"}
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-6 text-sm text-gray-400">
             <div>
               <span className="text-[11px] text-gray-500 mr-2">CPU:</span>
@@ -363,7 +360,7 @@ function DashboardPage({
                 </div>
               </div>
             </div>
-            
+
             <div className="border border-[#262626] p-3 rounded bg-[#0d0d0d] space-y-2 mt-4">
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Métricas de Confiabilidad</div>
               <div className="flex justify-between items-center text-xs">
@@ -412,11 +409,10 @@ function DashboardPage({
                 units.map((u, idx) => (
                   <tr key={idx} className="hover:bg-[#181818] transition-colors duration-100">
                     <td className="p-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        u.estado === "Operativa" ? "bg-green-500/10 text-green-500" :
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${u.estado === "Operativa" ? "bg-green-500/10 text-green-500" :
                         u.estado === "Con Incidencia" ? "bg-red-500/10 text-red-500" :
-                        u.estado === "Monitoreando" ? "bg-yellow-500/10 text-yellow-500" : "bg-gray-500/10 text-gray-500"
-                      }`}>
+                          u.estado === "Monitoreando" ? "bg-yellow-500/10 text-yellow-500" : "bg-gray-500/10 text-gray-500"
+                        }`}>
                         {u.estado}
                       </span>
                     </td>
@@ -455,6 +451,10 @@ function UnitsPage() {
   const [selectedUnit, setSelectedUnit] = useState<any | null>(null);
   const [unitDetail, setUnitDetail] = useState<any | null>(null);
   const [activeDetailTab, setActiveDetailTab] = useState("general");
+
+  // Checking states for manual monitoring
+  const [checkingIpId, setCheckingIpId] = useState<number | null>(null);
+  const [checkingAll, setCheckingAll] = useState(false);
 
   // IP Add/Edit Form States
   const [ipFormOpen, setIpFormOpen] = useState(false);
@@ -546,7 +546,7 @@ function UnitsPage() {
     };
 
     try {
-      const url = editingIp 
+      const url = editingIp
         ? `${API_URL}/api/units/${selectedUnit.id}/ips/${editingIp.id}`
         : `${API_URL}/api/units/${selectedUnit.id}/ips`;
       const method = editingIp ? "PUT" : "POST";
@@ -606,10 +606,56 @@ function UnitsPage() {
     }
   };
 
+  const handleCheckIp = async (ipId: number) => {
+    if (!selectedUnit) return;
+    setCheckingIpId(ipId);
+    try {
+      const res = await fetch(`${API_URL}/api/units/${selectedUnit.id}/ips/${ipId}/check`, {
+        method: "POST"
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(`Monitoreo de IP finalizado.\nResultado: ${data.status}\nLatencia: ${data.latency !== null ? data.latency + 'ms' : 'N/A'}${data.errorMsg ? '\nError: ' + data.errorMsg : ''}`);
+        await openDetail(selectedUnit);
+      } else {
+        alert(`Error al monitorear IP: ${data.error || 'Falla de comunicación'}`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(`Error de red: ${err.message}`);
+    } finally {
+      setCheckingIpId(null);
+    }
+  };
+
+  const handleCheckAllIps = async () => {
+    if (!selectedUnit) return;
+    setCheckingAll(true);
+    try {
+      const res = await fetch(`${API_URL}/api/units/${selectedUnit.id}/check-ips`, {
+        method: "POST"
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const offlineCount = data.results.filter((r: any) => r.status === "OFFLINE").length;
+        const onlineCount = data.results.filter((r: any) => r.status === "ONLINE").length;
+        alert(`Revisión completa de enlaces finalizada.\n\nEnlaces ONLINE: ${onlineCount}\nEnlaces OFFLINE: ${offlineCount}`);
+        await openDetail(selectedUnit);
+      } else {
+        alert(`Error al monitorear enlaces: ${data.error || 'Falla de comunicación'}`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(`Error de red: ${err.message}`);
+    } finally {
+      setCheckingAll(false);
+    }
+  };
+
   const handleToggleMonitoring = async () => {
     if (!unitDetail) return;
     const nextActivo = !unitDetail.activo;
-    
+
     let motivoPausa = null;
     if (!nextActivo) {
       const reason = prompt("Ingrese el motivo de la pausa de monitoreo para esta unidad:");
@@ -868,11 +914,10 @@ function UnitsPage() {
               <div className="space-y-1">
                 <div className="flex justify-between items-start">
                   <span className="font-mono text-[10px] text-gray-500">ID: {u.id}</span>
-                  <span className={`inline-block h-2 w-2 rounded-full ${
-                    u.estado === "Operativa" ? "bg-green-500" :
+                  <span className={`inline-block h-2 w-2 rounded-full ${u.estado === "Operativa" ? "bg-green-500" :
                     u.estado === "Con Incidencia" ? "bg-red-500" :
-                    u.estado === "Monitoreando" ? "bg-yellow-500" : "bg-gray-500"
-                  }`}></span>
+                      u.estado === "Monitoreando" ? "bg-yellow-500" : "bg-gray-500"
+                    }`}></span>
                 </div>
                 <div className="font-bold text-sm text-gray-100 line-clamp-1">{u.nombre}</div>
                 <div className="text-gray-400 text-[11px]">{u.ciudadNombre} - {u.tipo}</div>
@@ -948,11 +993,10 @@ function UnitsPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveDetailTab(tab.id)}
-                  className={`px-6 py-3 font-semibold ${
-                    activeDetailTab === tab.id 
-                      ? "bg-[#121212] text-white border-b-2 border-[#1e88e5]" 
-                      : "text-gray-400 hover:text-white"
-                  }`}
+                  className={`px-6 py-3 font-semibold ${activeDetailTab === tab.id
+                    ? "bg-[#121212] text-white border-b-2 border-[#1e88e5]"
+                    : "text-gray-400 hover:text-white"
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -1053,12 +1097,23 @@ function UnitsPage() {
                         </div>
                         <div className="flex space-x-2 shrink-0 w-full sm:w-auto justify-end">
                           <button
+                            onClick={handleCheckAllIps}
+                            className="bg-blue-600/10 text-blue-500 border border-blue-600/20 hover:bg-blue-600/25 px-4 py-2 rounded font-bold transition-all duration-100 flex items-center text-[11px] disabled:opacity-40"
+                            disabled={checkingAll}
+                          >
+                            {checkingAll ? (
+                              <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                            ) : (
+                              <Activity className="h-3.5 w-3.5 mr-1.5" />
+                            )}
+                            Monitorear Enlaces
+                          </button>
+                          <button
                             onClick={handleToggleMonitoring}
-                            className={`px-4 py-2 rounded font-bold transition-all duration-100 flex items-center text-[11px] ${
-                              unitDetail.activo
-                                ? "bg-amber-600/10 text-amber-500 border border-amber-600/20 hover:bg-amber-600/25"
-                                : "bg-green-600/10 text-green-500 border border-green-600/20 hover:bg-green-600/25"
-                            }`}
+                            className={`px-4 py-2 rounded font-bold transition-all duration-100 flex items-center text-[11px] ${unitDetail.activo
+                              ? "bg-amber-600/10 text-amber-500 border border-amber-600/20 hover:bg-amber-600/25"
+                              : "bg-green-600/10 text-green-500 border border-green-600/20 hover:bg-green-600/25"
+                              }`}
                           >
                             {unitDetail.activo ? (
                               <>
@@ -1088,13 +1143,27 @@ function UnitsPage() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-400">Total Direcciones IP: {unitDetail.ips?.length || 0}</span>
-                        <button
-                          onClick={startAddIp}
-                          className="bg-[#1e88e5] text-white text-xs px-3 py-1.5 rounded flex items-center hover:bg-[#1565c0]"
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Agregar IP
-                        </button>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={handleCheckAllIps}
+                            className="bg-blue-600/20 text-blue-400 border border-blue-600/30 text-xs px-3 py-1.5 rounded flex items-center hover:bg-blue-600/30 transition-all font-semibold disabled:opacity-40"
+                            disabled={checkingAll}
+                          >
+                            {checkingAll ? (
+                              <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                            ) : (
+                              <Activity className="h-3.5 w-3.5 mr-1.5" />
+                            )}
+                            Monitorear Enlaces
+                          </button>
+                          <button
+                            onClick={startAddIp}
+                            className="bg-[#1e88e5] text-white text-xs px-3 py-1.5 rounded flex items-center hover:bg-[#1565c0]"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Agregar IP
+                          </button>
+                        </div>
                       </div>
 
                       <div className="overflow-x-auto border border-[#262626] rounded">
@@ -1104,7 +1173,8 @@ function UnitsPage() {
                               <th className="p-3">IP</th>
                               <th className="p-3">Descripción</th>
                               <th className="p-3">Tipo</th>
-                              <th className="p-3">Estado</th>
+                              <th className="p-3">Auto Monitoreo</th>
+                              <th className="p-3">Conexión</th>
                               <th className="p-3">Pings / Time</th>
                               <th className="p-3 text-right">Acciones</th>
                             </tr>
@@ -1112,7 +1182,7 @@ function UnitsPage() {
                           <tbody className="divide-y divide-[#262626]">
                             {unitDetail.ips?.length === 0 ? (
                               <tr>
-                                <td colSpan={6} className="p-6 text-center text-gray-500">Sin direcciones IP configuradas para monitoreo.</td>
+                                <td colSpan={7} className="p-6 text-center text-gray-500">Sin direcciones IP configuradas para monitoreo.</td>
                               </tr>
                             ) : (
                               unitDetail.ips?.map((ip: any) => (
@@ -1120,21 +1190,43 @@ function UnitsPage() {
                                   <td className="p-3 font-mono font-bold text-gray-200">{ip.direccionIP}</td>
                                   <td className="p-3 text-gray-300">{ip.descripcion}</td>
                                   <td className="p-3">
-                                    <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${
-                                      ip.esCritica === 1 ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-gray-500/10 text-gray-400"
-                                    }`}>
+                                    <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${ip.esCritica === 1 ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-gray-500/10 text-gray-400"
+                                      }`}>
                                       {ip.esCritica === 1 ? "Crítica" : "Secundaria"}
                                     </span>
                                   </td>
                                   <td className="p-3">
-                                    <span className={`h-2.5 w-2.5 rounded-full inline-block ${
-                                      ip.activa === 1 ? "bg-green-500" : "bg-gray-500"
-                                    }`}></span>
+                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${ip.activa === 1 ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-gray-500/10 text-gray-400 border border-gray-500/20"
+                                      }`}>
+                                      {ip.activa === 1 ? "Activo" : "Pausado"}
+                                    </span>
+                                  </td>
+                                  <td className="p-3">
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${ip.ultimoResultado === "ONLINE" ? "bg-green-500/15 text-green-400 border border-green-500/30" :
+                                      ip.ultimoResultado === "OFFLINE" ? "bg-red-500/15 text-red-400 border border-red-500/30" :
+                                        "bg-gray-500/15 text-gray-400 border border-gray-500/30"
+                                      }`}>
+                                      <span className={`h-1.5 w-1.5 rounded-full mr-1.5 ${ip.ultimoResultado === "ONLINE" ? "bg-green-400" : ip.ultimoResultado === "OFFLINE" ? "bg-red-400" : "bg-gray-400"}`} />
+                                      {ip.ultimoResultado || "SIN DATOS"}
+                                      {ip.ultimoResultado === "ONLINE" && ip.ultimaLatencia !== null && ` (${ip.ultimaLatencia}ms)`}
+                                    </span>
                                   </td>
                                   <td className="p-3 font-mono text-[10px] text-gray-500">
                                     {ip.intervaloPing || "Global"}s / {ip.timeout || "Global"}ms
                                   </td>
                                   <td className="p-3 text-right space-x-2">
+                                    <button
+                                      onClick={() => handleCheckIp(ip.id)}
+                                      className="text-blue-400 hover:text-blue-300 inline-block disabled:opacity-40"
+                                      title="Monitorear Enlace IP"
+                                      disabled={checkingIpId === ip.id}
+                                    >
+                                      {checkingIpId === ip.id ? (
+                                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                                      ) : (
+                                        <Activity className="h-3.5 w-3.5" />
+                                      )}
+                                    </button>
                                     <button onClick={() => startEditIp(ip)} className="text-gray-400 hover:text-white inline-block">
                                       <Edit2 className="h-3.5 w-3.5" />
                                     </button>
@@ -1175,9 +1267,8 @@ function UnitsPage() {
                                   <td className="p-3 font-mono text-[#1e88e5] font-bold">{t.folio}</td>
                                   <td className="p-3 font-mono">{t.fechaInicio} {t.horaInicio}</td>
                                   <td className="p-3">
-                                    <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${
-                                      t.estado === "Abierto" ? "bg-red-500/10 text-red-500" : "bg-green-500/10 text-green-500"
-                                    }`}>
+                                    <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${t.estado === "Abierto" ? "bg-red-500/10 text-red-500" : "bg-green-500/10 text-green-500"
+                                      }`}>
                                       {t.estado}
                                     </span>
                                   </td>
@@ -1212,7 +1303,7 @@ function UnitsPage() {
                 Cancelar
               </button>
             </div>
-            
+
             <form onSubmit={handleSaveIp} className="p-6 space-y-4 text-xs">
               {validationError && (
                 <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded font-medium">
@@ -1312,7 +1403,7 @@ function UnitsPage() {
                 Cancelar
               </button>
             </div>
-            
+
             <form onSubmit={handleSaveUnit} className="p-6 space-y-4 text-xs text-left">
               <div className="space-y-1.5">
                 <label className="text-gray-400 font-semibold">ID Oficial (Número Único)</label>
@@ -1726,9 +1817,8 @@ function TicketsPage({
                     </td>
                     <td className="p-3 font-mono text-gray-400">{t.duracionLegible}</td>
                     <td className="p-3">
-                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${
-                        t.estado === "Abierto" ? "bg-red-500/10 text-red-500" : "bg-green-500/10 text-green-500"
-                      }`}>
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${t.estado === "Abierto" ? "bg-red-500/10 text-red-500" : "bg-green-500/10 text-green-500"
+                        }`}>
                         {t.estado}
                       </span>
                     </td>
@@ -1913,12 +2003,12 @@ function ReportsPage({ globalSettings }: { globalSettings: any }) {
       if (!res.ok) {
         throw new Error("Failed to generate report file");
       }
-      
+
       const blob = await res.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = blobUrl;
-      a.download = `Reporte_${type.toUpperCase()}_${new Date().toISOString().substring(0,10)}.${format === "excel" ? "xlsx" : format}`;
+      a.download = `Reporte_${type.toUpperCase()}_${new Date().toISOString().substring(0, 10)}.${format === "excel" ? "xlsx" : format}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -1988,11 +2078,10 @@ function ReportsPage({ globalSettings }: { globalSettings: any }) {
                 key={f.id}
                 type="button"
                 onClick={() => setFormat(f.id)}
-                className={`p-3 border rounded text-center transition-all ${
-                  format === f.id 
-                    ? "bg-[#1e88e5]/10 border-[#1e88e5] text-white" 
-                    : "bg-[#1c1c1c] border-[#262626] text-gray-400 hover:text-white"
-                }`}
+                className={`p-3 border rounded text-center transition-all ${format === f.id
+                  ? "bg-[#1e88e5]/10 border-[#1e88e5] text-white"
+                  : "bg-[#1c1c1c] border-[#262626] text-gray-400 hover:text-white"
+                  }`}
               >
                 <div className="font-bold text-[11px]">{f.label}</div>
                 <div className="text-[9px] text-gray-500 mt-1">{f.desc}</div>
@@ -2147,11 +2236,10 @@ function ImportsPage() {
         )}
 
         {validationResult && (
-          <div className={`p-4 rounded border ${
-            validationResult.success 
-              ? "bg-green-500/10 border-green-500/20 text-green-400" 
-              : "bg-red-500/10 border-red-500/20 text-red-500"
-          }`}>
+          <div className={`p-4 rounded border ${validationResult.success
+            ? "bg-green-500/10 border-green-500/20 text-green-400"
+            : "bg-red-500/10 border-red-500/20 text-red-500"
+            }`}>
             <div className="font-bold flex items-center space-x-1.5 mb-1">
               {validationResult.success ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
               <span>{validationResult.success ? "Sintaxis Correcta" : "Error de Validación"}</span>
@@ -2184,9 +2272,8 @@ function ImportsPage() {
             <div className="h-full flex items-center justify-center text-gray-600 text-xs">Sin cargas previas registradas</div>
           ) : (
             history.map((h, i) => (
-              <div key={i} className={`p-3 rounded text-xs border ${
-                h.resultado === "EXITOSO" ? "bg-green-500/5 border-green-950/20" : "bg-red-500/5 border-red-950/20"
-              } space-y-1`}>
+              <div key={i} className={`p-3 rounded text-xs border ${h.resultado === "EXITOSO" ? "bg-green-500/5 border-green-950/20" : "bg-red-500/5 border-red-950/20"
+                } space-y-1`}>
                 <div className="flex justify-between font-bold">
                   <span className={h.resultado === "EXITOSO" ? "text-green-500" : "text-red-500"}>{h.resultado}</span>
                   <span className="text-gray-500 font-mono">{h.fecha} {h.hora}</span>
@@ -2326,9 +2413,8 @@ function BackupsPage() {
                       <span className="text-gray-400">{b.automatico === 1 ? "Automático" : "Manual"}</span>
                     </td>
                     <td className="p-3">
-                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${
-                        b.resultado === "EXITOSO" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
-                      }`}>
+                      <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold ${b.resultado === "EXITOSO" ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
+                        }`}>
                         {b.resultado}
                       </span>
                     </td>
@@ -2637,12 +2723,11 @@ function LogsPage() {
             logs.map((log, idx) => (
               <div key={idx} className="py-2 flex items-start space-x-3 hover:bg-[#181818]">
                 <span className="text-gray-500 select-none">{log.fechaHora?.substring(0, 19).replace("T", " ")}</span>
-                <span className={`font-bold inline-block w-20 shrink-0 ${
-                  log.nivel === "INFO" ? "text-blue-400" :
+                <span className={`font-bold inline-block w-20 shrink-0 ${log.nivel === "INFO" ? "text-blue-400" :
                   log.nivel === "WARNING" ? "text-yellow-400" :
-                  log.nivel === "ERROR" ? "text-red-400" :
-                  log.nivel === "CRITICAL" ? "text-red-600 animate-pulse" : "text-gray-500"
-                }`}>
+                    log.nivel === "ERROR" ? "text-red-400" :
+                      log.nivel === "CRITICAL" ? "text-red-600 animate-pulse" : "text-gray-500"
+                  }`}>
                   [{log.nivel}]
                 </span>
                 <span className="text-gray-400 shrink-0 w-28">[{log.modulo}]</span>
@@ -2651,7 +2736,7 @@ function LogsPage() {
             ))
           )}
         </div>
-        
+
         {/* PAGINATION PANEL */}
         <div className="px-4 py-3 border-t border-[#262626] bg-[#0d0d0d] flex items-center justify-between text-gray-400">
           <span>Total logs: <b className="text-gray-200">{total}</b></span>
@@ -2699,7 +2784,7 @@ function AboutPage({ status }: { status: any }) {
           • <b>Autor</b>: LSC Israel Díaz Serrano<br />
           • <b>Fecha</b>: Julio 2026<br />
           • <b>Entorno</b>: Local 24/7 (Windows Background Tasks / Service)<br />
-          • <b>Copyright</b>: © {new Date().getFullYear()} LSC Israel Díaz Serrano. Todos los derechos reservados.
+          • <b>Copyright</b>: © {new Date().getFullYear()} LSC Israel Díaz Serrano.<br />Todos los derechos reservados.
         </div>
       </div>
 
