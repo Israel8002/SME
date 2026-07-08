@@ -311,6 +311,7 @@ Especialista en
 **Sistema de Monitoreo de Enlaces (SME)**
 
 Desarrollado para la gestión profesional de infraestructura de telecomunicaciones.
+
 <a href="https://github.com/sponsors/Israel8002">
   <img src="https://img.shields.io/badge/Sponsor-Israel8002-EA4AAA?style=for-the-badge&logo=GitHub+Sponsors&logoColor=white" alt="Sponsor Israel8002" />
 </a>
