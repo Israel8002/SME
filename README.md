@@ -1,6 +1,7 @@
 <div align="center">
 
 # 🛰️ Sistema de Monitoreo de Enlaces (SME)
+[![GitHub Streak](https://streak-stats.demolab.com/?user=DenverCoder1)](https://git.io/streak-stats)
 
 ### Plataforma Profesional para el Monitoreo Inteligente de Infraestructura de Red
 

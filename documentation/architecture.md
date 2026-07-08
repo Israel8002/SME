@@ -1,4 +1,5 @@
 # Documento de Arquitectura de Software: Sistema de Monitoreo de Enlaces (SME)
+**Versión del Sistema:** 1.2.0
 
 ## 1. Introducción y Objetivos
 El **Sistema de Monitoreo de Enlaces (SME)** es una plataforma empresarial diseñada para el monitoreo permanente, local y automatizado de la infraestructura de red en unidades institucionales. Su principal objetivo es operar de forma ininterrumpida las 24 horas del día, detectando fallas de comunicación, abriendo y cerrando incidentes (tickets) de manera autónoma, y proporcionando interfaces de consulta, reportes y configuraciones avanzadas.
@@ -74,41 +75,44 @@ La persistencia se realiza localmente en una base de datos SQLite normalizada. P
 ### Definición de Tablas (DDL)
 
 ```sql
+PRAGMA foreign_keys = ON;
+
 -- 1. Ciudades
-CREATE TABLE cities (
+CREATE TABLE IF NOT EXISTS cities (
     id TEXT PRIMARY KEY,
     nombre TEXT NOT NULL CHECK(nombre <> '')
 );
 
 -- 2. Unidades (Catálogo Oficial)
-CREATE TABLE units (
-    id TEXT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS units (
+    id INTEGER PRIMARY KEY,
     nombre TEXT NOT NULL CHECK(nombre <> ''),
     cityId TEXT NOT NULL,
     tipo TEXT NOT NULL CHECK(tipo <> ''),
     activo INTEGER NOT NULL DEFAULT 1 CHECK(activo IN (0, 1)),
+    motivoPausa TEXT NULL,
     fechaImportacion TEXT NOT NULL,
     ultimaActualizacion TEXT NOT NULL,
     FOREIGN KEY (cityId) REFERENCES cities(id) ON DELETE RESTRICT
 );
-CREATE INDEX idx_units_city ON units(cityId);
-CREATE INDEX idx_units_activo ON units(activo);
+CREATE INDEX IF NOT EXISTS idx_units_city ON units(cityId);
+CREATE INDEX IF NOT EXISTS idx_units_activo ON units(activo);
 
 -- 3. Cuartos (Catálogo Oficial)
-CREATE TABLE rooms (
+CREATE TABLE IF NOT EXISTS rooms (
     id TEXT PRIMARY KEY,
-    unitId TEXT NOT NULL,
+    unitId INTEGER NOT NULL,
     nombre TEXT NOT NULL CHECK(nombre <> ''),
     fechaImportacion TEXT NOT NULL,
     ultimaActualizacion TEXT NOT NULL,
     FOREIGN KEY (unitId) REFERENCES units(id) ON DELETE CASCADE
 );
-CREATE INDEX idx_rooms_unit ON rooms(unitId);
+CREATE INDEX IF NOT EXISTS idx_rooms_unit ON rooms(unitId);
 
 -- 4. Direcciones IP de Unidades (Configuración Local de Monitoreo)
-CREATE TABLE unit_ips (
+CREATE TABLE IF NOT EXISTS unit_ips (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    unitId TEXT NOT NULL,
+    unitId INTEGER NOT NULL,
     direccionIP TEXT NOT NULL,
     descripcion TEXT NOT NULL,
     esCritica INTEGER NOT NULL DEFAULT 0 CHECK(esCritica IN (0, 1)),
@@ -118,17 +122,17 @@ CREATE TABLE unit_ips (
     fechaAlta TEXT NOT NULL,
     ultimaModificacion TEXT NOT NULL,
     FOREIGN KEY (unitId) REFERENCES units(id) ON DELETE CASCADE,
-    UNIQUE(unitId, direccionIP)       -- Evita IPs duplicadas por unidad
+    UNIQUE(unitId, direccionIP)
 );
-CREATE INDEX idx_unit_ips_unit ON unit_ips(unitId);
-CREATE INDEX idx_unit_ips_activa ON unit_ips(activa);
-CREATE INDEX idx_unit_ips_ip ON unit_ips(direccionIP);
+CREATE INDEX IF NOT EXISTS idx_unit_ips_unit ON unit_ips(unitId);
+CREATE INDEX IF NOT EXISTS idx_unit_ips_activa ON unit_ips(activa);
+CREATE INDEX IF NOT EXISTS idx_unit_ips_ip ON unit_ips(direccionIP);
 
 -- 5. Tickets Automáticos
-CREATE TABLE tickets (
+CREATE TABLE IF NOT EXISTS tickets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     folio TEXT UNIQUE NOT NULL,
-    unitId TEXT NOT NULL,
+    unitId INTEGER NOT NULL,
     fechaInicio TEXT NOT NULL,       -- ISO8601 YYYY-MM-DD
     horaInicio TEXT NOT NULL,        -- HH:MM:SS
     fechaFin TEXT NULL,
@@ -137,15 +141,16 @@ CREATE TABLE tickets (
     estado TEXT NOT NULL DEFAULT 'Abierto' CHECK(estado IN ('Abierto', 'Cerrado')),
     motivo TEXT NOT NULL,
     observaciones TEXT NULL,
+    ticketProveedor TEXT NULL,
     creadoAutomaticamente INTEGER NOT NULL DEFAULT 1,
     FOREIGN KEY (unitId) REFERENCES units(id) ON DELETE RESTRICT
 );
-CREATE INDEX idx_tickets_unit ON tickets(unitId);
-CREATE INDEX idx_tickets_estado ON tickets(estado);
-CREATE INDEX idx_tickets_fecha ON tickets(fechaInicio);
+CREATE INDEX IF NOT EXISTS idx_tickets_unit ON tickets(unitId);
+CREATE INDEX IF NOT EXISTS idx_tickets_estado ON tickets(estado);
+CREATE INDEX IF NOT EXISTS idx_tickets_fecha ON tickets(fechaInicio);
 
 -- 6. Detalles del Ticket
-CREATE TABLE ticket_details (
+CREATE TABLE IF NOT EXISTS ticket_details (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ticketId INTEGER NOT NULL,
     ipId INTEGER NOT NULL,
@@ -155,10 +160,10 @@ CREATE TABLE ticket_details (
     FOREIGN KEY (ticketId) REFERENCES tickets(id) ON DELETE CASCADE,
     FOREIGN KEY (ipId) REFERENCES unit_ips(id) ON DELETE RESTRICT
 );
-CREATE INDEX idx_ticket_details_ticket ON ticket_details(ticketId);
+CREATE INDEX IF NOT EXISTS idx_ticket_details_ticket ON ticket_details(ticketId);
 
 -- 7. Historial de Pings
-CREATE TABLE ping_history (
+CREATE TABLE IF NOT EXISTS ping_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ipId INTEGER NOT NULL,
     fechaHora TEXT NOT NULL,         -- ISO8601 YYYY-MM-DDTHH:MM:SS.SSSZ
@@ -167,65 +172,66 @@ CREATE TABLE ping_history (
     mensajeError TEXT NULL,
     FOREIGN KEY (ipId) REFERENCES unit_ips(id) ON DELETE CASCADE
 );
-CREATE INDEX idx_ping_history_ip ON ping_history(ipId);
-CREATE INDEX idx_ping_history_fecha ON ping_history(fechaHora);
+CREATE INDEX IF NOT EXISTS idx_ping_history_ip ON ping_history(ipId);
+CREATE INDEX IF NOT EXISTS idx_ping_history_fecha ON ping_history(fechaHora);
 
 -- 8. Estado del Servicio Monitor
-CREATE TABLE monitor_status (
-    id INTEGER PRIMARY KEY CHECK (id = 1), -- Registro único
+CREATE TABLE IF NOT EXISTS monitor_status (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
     ultimaEjecucion TEXT NOT NULL,
     inicioServicio TEXT NOT NULL,
     estado TEXT NOT NULL CHECK(estado IN ('OPERANDO', 'DETENIDO', 'ERROR')),
     version TEXT NOT NULL,
     memoria REAL NOT NULL,                 -- MB
     cpu REAL NOT NULL,                     -- %
+    ipsMonitoreadas INTEGER NOT NULL DEFAULT 0,
     ultimaActualizacion TEXT NOT NULL
 );
 
 -- 9. Configuraciones Globales
-CREATE TABLE settings (
-    id INTEGER PRIMARY KEY CHECK (id = 1), -- Registro único
+CREATE TABLE IF NOT EXISTS settings (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
     intervaloPing INTEGER NOT NULL DEFAULT 30,
     fallosConsecutivos INTEGER NOT NULL DEFAULT 10,
     recuperacionesConsecutivas INTEGER NOT NULL DEFAULT 3,
     timeout INTEGER NOT NULL DEFAULT 1000,
     rutaRespaldos TEXT NOT NULL,
     rutaExportaciones TEXT NOT NULL,
-    nombreInstitucion TEXT NOT NULL DEFAULT 'IMSS',
-    logo TEXT NULL,                        -- Base64 o ruta local
+    nombreInstitucion TEXT NOT NULL DEFAULT 'IMSS OOAD BC',
+    logo TEXT NULL,
     actualizacionAutomatica INTEGER NOT NULL DEFAULT 1
 );
 
 -- 10. Historial de Importaciones
-CREATE TABLE imports (
+CREATE TABLE IF NOT EXISTS imports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tipoArchivo TEXT NOT NULL,            -- 'cities', 'units', 'rooms', 'all'
+    tipoArchivo TEXT NOT NULL,
     fecha TEXT NOT NULL,
     hora TEXT NOT NULL,
     usuario TEXT NOT NULL,
     registrosImportados INTEGER NOT NULL,
-    errores TEXT NULL,                     -- JSON de errores si falló
-    duracion INTEGER NOT NULL,            -- Milisegundos
+    errores TEXT NULL,
+    duracion INTEGER NOT NULL,
     resultado TEXT NOT NULL CHECK(resultado IN ('EXITOSO', 'FALLIDO')),
     archivoOriginal TEXT NOT NULL
 );
 
 -- 11. Historial de Respaldos
-CREATE TABLE backups (
+CREATE TABLE IF NOT EXISTS backups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     fecha TEXT NOT NULL,
     hora TEXT NOT NULL,
     ruta TEXT NOT NULL,
-    tamano INTEGER NOT NULL,              -- Bytes
+    tamano INTEGER NOT NULL,
     automatico INTEGER NOT NULL CHECK(automatico IN (0, 1)),
     usuario TEXT NOT NULL,
     resultado TEXT NOT NULL CHECK(resultado IN ('EXITOSO', 'FALLIDO'))
 );
 
 -- 12. Historial de Exportaciones
-CREATE TABLE exports (
+CREATE TABLE IF NOT EXISTS exports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tipo TEXT NOT NULL,                   -- 'PDF', 'EXCEL', 'CSV'
+    tipo TEXT NOT NULL,
     fecha TEXT NOT NULL,
     hora TEXT NOT NULL,
     usuario TEXT NOT NULL,
@@ -234,7 +240,7 @@ CREATE TABLE exports (
 );
 
 -- 13. Bitácora General (Logs)
-CREATE TABLE logs (
+CREATE TABLE IF NOT EXISTS logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     fechaHora TEXT NOT NULL,
     nivel TEXT NOT NULL CHECK(nivel IN ('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')),
@@ -245,8 +251,8 @@ CREATE TABLE logs (
     ipEquipo TEXT NULL,
     versionSistema TEXT NOT NULL
 );
-CREATE INDEX idx_logs_nivel ON logs(nivel);
-CREATE INDEX idx_logs_fecha ON logs(fechaHora);
+CREATE INDEX IF NOT EXISTS idx_logs_nivel ON logs(nivel);
+CREATE INDEX IF NOT EXISTS idx_logs_fecha ON logs(fechaHora);
 ```
 
 ---
@@ -258,7 +264,7 @@ Este módulo procesa los archivos JSON oficiales (`cities.json`, `units.json`, `
 
 *   **Transaccionalidad Estricta**: La importación de un archivo se realiza dentro de una transacción de base de datos (`BEGIN TRANSACTION`). Si se encuentra algún error de validación o integridad relacional, se ejecuta `ROLLBACK` y la base de datos permanece intacta.
 *   **Validaciones Previas**:
-    1.  Estructura e integridad de los datos usando esquemas estrictos (ej. Zod). No se permiten campos adicionales ni faltantes.
+    1.  Estructura e integridad de los datos usando esquemas privados/compartidos (ej. Zod). No se permiten campos adicionales ni faltantes.
     2.  No existencia de duplicados de ID en el JSON.
     3.  Validación cruzada: Todas las unidades deben hacer referencia a un `cityId` existente (en la base de datos o en el JSON entrante). Todos los cuartos deben pertenecer a una unidad existente.
     4.  No se permiten campos de texto vacíos o nulos en elementos requeridos.
@@ -293,11 +299,11 @@ Proceso independiente en Node.js desarrollado en TypeScript. Corre como servicio
     *   Si es necesario, se cierra el ticket de la unidad y se calcula la duración del incidente en segundos.
 
 ### D. Gestión de Tickets Automáticos
-Los incidentes se administran de manera totalmente autónoma.
+Los incidentes se administran de manera autónoma por el monitor, con soporte para la interacción de los operadores.
 *   **Folio Autogenerado**: Formato `SME-YYYYMMDD-XXXXXX`. El consecutivo `XXXXXX` (ej. 000001) se reinicia automáticamente cada 1 de enero.
 *   **Duración del Incidente**: Al cerrarse el ticket, se calcula la diferencia en segundos entre la fecha/hora de inicio y la fecha/hora de fin, guardando el valor numérico en `duracionSegundos` y generando una representación legible (ej. "1 día, 04 horas, 12 minutos").
-*   **Trazabilidad Extrema**: Cada ticket está ligado a `ticket_details` indicando exactamente cuáles IPs críticas fallaron y provocaron la apertura del ticket.
-*   **Historial Intacto**: No se permite la alteración manual de los datos generados por el monitor. Tampoco se permite reabrir un ticket cerrado; nuevas caídas generan folios de tickets nuevos.
+*   **Trazabilidad y Campos de Gestión (Proveedor)**: Cada ticket está ligado a `ticket_details` indicando exactamente cuáles IPs críticas fallaron. Además, los operadores pueden registrar o actualizar el número de ticket externo del proveedor en el campo `ticketProveedor` para un seguimiento unificado.
+*   **Cierre y Eliminación Manual**: Se permite al administrador realizar un cierre manual de tickets abiertos (registrando comentarios en `observaciones`) y llevar a cabo depuraciones (eliminación individual, selección múltiple en lote o por rangos de fechas de inicio) directamente desde el Dashboard web, manteniendo una bitácora de estas acciones en los logs.
 
 ### E. Dashboard de Operaciones (Estilo NOC)
 El dashboard se concibe como una pantalla de visualización seria y ejecutiva.
@@ -322,6 +328,7 @@ Bitácora de auditoría detallada en SQLite.
 *   Cinco niveles: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`.
 *   Registra de forma automática inicios/paradas del monitor, fallos de ping, aperturas de tickets, respaldos, importaciones y errores.
 *   Cuenta con una interfaz de consulta con filtros avanzados y paginación rápida.
+*   **Depuración de Bitácora**: Se cuenta con la capacidad de realizar una limpieza general de la tabla de logs desde la pantalla de administración para optimizar el tamaño de la base de datos, dejando registrado el evento de depuración en la propia tabla limpia para auditoría.
 
 ---
 
@@ -348,41 +355,42 @@ El comando nativo de ping en Windows es fiable y no requiere permisos especiales
 ---
 
 ## 7. Estructura de Directorios del Proyecto
-El proyecto en el espacio de trabajo se estructurará de la siguiente manera:
+El proyecto en el espacio de trabajo está estructurado de la siguiente manera:
 
 ```
 SME/
-├── shared/                       # Tipos, interfaces y esquemas comunes de TS
+├── shared/                       # Tipos, interfaces y esquemas comunes de TS (Zod)
 │   └── src/
-│       ├── types/
-│       └── schemas/
+│       └── index.ts              # Declaraciones unificadas de tipos y validaciones
 ├── database/                     # Archivo de base de datos SQLite y scripts DDL
-│   ├── sme.db
-│   └── schema.sql
+│   ├── init-db.ts                # Inicialización y migraciones
+│   ├── schema.sql                # Definición de tablas e índices
+│   ├── sme.db                    # Base de datos SQLite activa (WAL Mode)
+│   ├── sme.db-shm                # Archivo SQLite Shared Memory
+│   └── sme.db-wal                # Archivo SQLite Write-Ahead Log
 ├── backend-api/                  # API REST Express + TypeScript
 │   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── repositories/
-│   │   ├── services/
-│   │   └── app.ts
+│   │   ├── config/               # Conexión DB y configuración de logger
+│   │   ├── controllers/          # Controladores (Backup, Export, Import, Log, Ticket, Unit)
+│   │   ├── utils/                # Utilidades de ayuda
+│   │   └── server.ts             # Servidor Express y definición de endpoints
 │   ├── package.json
 │   └── tsconfig.json
 ├── monitor-service/              # Servicio de Windows en Node.js + TypeScript
 │   ├── src/
-│   │   ├── config/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   └── monitor.ts
+│   │   ├── services/             # Cola de ejecución (QueueManager) y ejecutor de Pings (PingExecutor)
+│   │   └── monitor.ts            # Hilo de ejecución principal del monitor
+│   ├── install-service.ps1       # Script PowerShell para instalación del servicio
+│   ├── uninstall-service.ps1     # Script PowerShell para desinstalación del servicio
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/                     # Interfaz SPA React + TS + Vite + TailwindCSS
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── context/
-│   │   └── App.tsx
+│   │   ├── assets/               # Archivos estáticos
+│   │   ├── App.css               # Estilos globales específicos
+│   │   ├── App.tsx               # Componente React principal (Dashboard NOC y módulos unificados)
+│   │   ├── index.css             # Estilos de Tailwind CSS y base
+│   │   └── main.tsx              # Punto de entrada de la aplicación React
 │   ├── package.json
 │   ├── tailwind.config.js
 │   └── vite.config.ts
@@ -391,5 +399,5 @@ SME/
 ├── imports/                      # Carpeta para depósitos de archivos JSON a importar
 ├── logs/                         # Registros de log adicionales en texto plano si se requieren
 └── documentation/                # Documentos de especificación técnica y manuales
-    └── architecture.md
+    └── architecture.md           # Documentación de arquitectura
 ```
