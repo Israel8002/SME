@@ -55,6 +55,9 @@ db.serialize(() => {
     db.run("PRAGMA foreign_keys = ON;");
     db.run("PRAGMA journal_mode = WAL;");
     db.run("PRAGMA busy_timeout = 5000;");
+    db.run("ALTER TABLE settings ADD COLUMN sondaIp TEXT DEFAULT '11.1.2.254';", (err) => {
+        // Ignore duplicate column name
+    });
 });
 // Promise wrappers
 const query = {
@@ -223,6 +226,7 @@ async function monitorCycle() {
         const defFailures = settings?.fallosConsecutivos || 10;
         const defRecoveries = settings?.recuperacionesConsecutivas || 3;
         const defTimeout = settings?.timeout || 1000;
+        const sondaIp = settings?.sondaIp || "11.1.2.254";
         const maxConcurrency = 25; // Limit active Windows ping concurrent processes
         // 2. Fetch Active IPs
         const ipRows = await query.all(`
@@ -237,8 +241,6 @@ async function monitorCycle() {
             setTimeout(monitorCycle, defInterval * 1000);
             return;
         }
-        console.log(`Starting ping cycle for ${ipRows.length} active IPs...`);
-        await updateMonitorStatus(ipRows.length);
         // Synchronize map of trackers
         for (const ip of ipRows) {
             if (!trackers.has(ip.id)) {
@@ -268,27 +270,26 @@ async function monitorCycle() {
                 trackers.delete(id);
             }
         }
-        // 3. Execute concurrent pings
-        const pingResults = await QueueManager_1.QueueManager.runConcurrent(ipRows, maxConcurrency, (ip) => PingExecutor_1.PingExecutor.ping(ip.direccionIP, ip.timeout || defTimeout));
-        const nowISO = new Date().toISOString();
-        // 4. Save results and evaluate triggers
-        for (let i = 0; i < ipRows.length; i++) {
-            const ip = ipRows[i];
-            const res = pingResults[i];
-            const tracker = trackers.get(ip.id);
-            // Save history row
+        // Identify the probe IP row
+        const sondaIpRow = ipRows.find(ip => ip.direccionIP === sondaIp);
+        let proceedWithAllPings = true;
+        if (sondaIpRow) {
+            const tracker = trackers.get(sondaIpRow.id);
+            const timeout = sondaIpRow.timeout || defTimeout;
+            console.log(`Pinging Sonda IP sequentially first: ${sondaIpRow.direccionIP}`);
+            const res = await PingExecutor_1.PingExecutor.ping(sondaIpRow.direccionIP, timeout);
+            const nowISO = new Date().toISOString();
             await query.run(`INSERT INTO ping_history (ipId, fechaHora, resultado, latencia, mensajeError)
-         VALUES (?, ?, ?, ?, ?)`, [ip.id, nowISO, res.status, res.latency, res.errorMsg]);
-            const targetFailures = ip.fallosConsecutivos || defFailures;
-            const targetRecoveries = ip.recuperacionesConsecutivas || defRecoveries;
+         VALUES (?, ?, ?, ?, ?)`, [sondaIpRow.id, nowISO, res.status, res.latency, res.errorMsg]);
+            const targetFailures = sondaIpRow.fallosConsecutivos || defFailures;
+            const targetRecoveries = sondaIpRow.recuperacionesConsecutivas || defRecoveries;
             if (res.status === "OFFLINE") {
                 tracker.consecutiveRecoveries = 0;
                 tracker.consecutiveFailures++;
                 if (tracker.consecutiveFailures === targetFailures && tracker.currentState !== "OFFLINE") {
                     tracker.currentState = "OFFLINE";
-                    await logEvent("WARNING", "Servicio Monitor", "Caída Enlace", `Caída confirmada del enlace ${ip.direccionIP} (${ip.descripcion}) de la unidad ID ${ip.unitId}.`);
-                    // Check ticket rules
-                    await evaluateUnitTickets(ip.unitId);
+                    await logEvent("CRITICAL", "Servicio Monitor", "Caída Sonda", `Caída confirmada de la SONDA MONITOR con IP: ${sondaIpRow.direccionIP}. El escaneo de otras IPs se ha detenido para evitar tickets falsos.`);
+                    await evaluateUnitTickets(sondaIpRow.unitId);
                 }
             }
             else {
@@ -296,10 +297,77 @@ async function monitorCycle() {
                 tracker.consecutiveRecoveries++;
                 if (tracker.consecutiveRecoveries === targetRecoveries && tracker.currentState !== "ONLINE") {
                     tracker.currentState = "ONLINE";
-                    await logEvent("INFO", "Servicio Monitor", "Recuperación Enlace", `Recuperación confirmada del enlace ${ip.direccionIP} (${ip.descripcion}) de la unidad ID ${ip.unitId}.`);
-                    // Check ticket rules
-                    await evaluateUnitTickets(ip.unitId);
+                    await logEvent("INFO", "Servicio Monitor", "Recuperación Sonda", `Recuperación confirmada de la SONDA MONITOR con IP: ${sondaIpRow.direccionIP}. Se reanuda el escaneo normal.`);
+                    await evaluateUnitTickets(sondaIpRow.unitId);
                 }
+            }
+            if (tracker.currentState === "OFFLINE") {
+                proceedWithAllPings = false;
+                console.log(`Sonda monitor is OFFLINE. Skipping scan for all other ${ipRows.length - 1} IPs.`);
+                await updateMonitorStatus(1);
+            }
+        }
+        if (proceedWithAllPings) {
+            // Prioritize scanning: Sonda is already done.
+            // Now filter Sonda IP and sort other IPs so that units with open tickets are pinged first.
+            const otherIpRows = ipRows.filter(ip => ip.direccionIP !== sondaIp);
+            const openTickets = await query.all("SELECT DISTINCT unitId FROM tickets WHERE estado = 'Abierto'");
+            const openTicketUnitIds = new Set(openTickets.map(t => t.unitId));
+            otherIpRows.sort((a, b) => {
+                const aHasTicket = openTicketUnitIds.has(a.unitId);
+                const bHasTicket = openTicketUnitIds.has(b.unitId);
+                if (aHasTicket && !bHasTicket)
+                    return -1;
+                if (!aHasTicket && bHasTicket)
+                    return 1;
+                return 0;
+            });
+            console.log(`Starting prioritized concurrent ping cycle for ${otherIpRows.length} active IPs...`);
+            await updateMonitorStatus(ipRows.length);
+            // Execute concurrent pings for other IPs
+            const pingResults = await QueueManager_1.QueueManager.runConcurrent(otherIpRows, maxConcurrency, (ip) => PingExecutor_1.PingExecutor.ping(ip.direccionIP, ip.timeout || defTimeout));
+            const nowISO = new Date().toISOString();
+            const evaluatedUnits = new Set();
+            if (sondaIpRow) {
+                evaluatedUnits.add(sondaIpRow.unitId);
+            }
+            // Save results and evaluate triggers
+            for (let i = 0; i < otherIpRows.length; i++) {
+                const ip = otherIpRows[i];
+                const res = pingResults[i];
+                const tracker = trackers.get(ip.id);
+                // Save history row
+                await query.run(`INSERT INTO ping_history (ipId, fechaHora, resultado, latencia, mensajeError)
+           VALUES (?, ?, ?, ?, ?)`, [ip.id, nowISO, res.status, res.latency, res.errorMsg]);
+                const targetFailures = ip.fallosConsecutivos || defFailures;
+                const targetRecoveries = ip.recuperacionesConsecutivas || defRecoveries;
+                if (res.status === "OFFLINE") {
+                    tracker.consecutiveRecoveries = 0;
+                    tracker.consecutiveFailures++;
+                    if (tracker.consecutiveFailures === targetFailures && tracker.currentState !== "OFFLINE") {
+                        tracker.currentState = "OFFLINE";
+                        await logEvent("WARNING", "Servicio Monitor", "Caída Enlace", `Caída confirmada del enlace ${ip.direccionIP} (${ip.descripcion}) de la unidad ID ${ip.unitId}.`);
+                        evaluatedUnits.add(ip.unitId);
+                    }
+                }
+                else {
+                    tracker.consecutiveFailures = 0;
+                    tracker.consecutiveRecoveries++;
+                    if (tracker.consecutiveRecoveries === targetRecoveries && tracker.currentState !== "ONLINE") {
+                        tracker.currentState = "ONLINE";
+                        await logEvent("INFO", "Servicio Monitor", "Recuperación Enlace", `Recuperación confirmada del enlace ${ip.direccionIP} (${ip.descripcion}) de la unidad ID ${ip.unitId}.`);
+                        evaluatedUnits.add(ip.unitId);
+                    }
+                }
+            }
+            // Evaluate ticket rules for:
+            // 1. Any unit that had a state transition in this cycle
+            // 2. Any unit that currently has an open ticket (this ensures automatic resolution of manually opened tickets)
+            for (const openId of openTicketUnitIds) {
+                evaluatedUnits.add(openId);
+            }
+            for (const unitId of evaluatedUnits) {
+                await evaluateUnitTickets(unitId);
             }
         }
         // 5. Cleanup task

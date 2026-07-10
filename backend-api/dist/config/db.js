@@ -63,6 +63,12 @@ exports.db = new sqlite3_1.default.Database(DB_PATH, (err) => {
                     console.error("Failed to add ticketProveedor column:", alterErr.message);
                 }
             });
+            // Auto-migration for settings.sondaIp column
+            exports.db.run("ALTER TABLE settings ADD COLUMN sondaIp TEXT DEFAULT '11.1.2.254';", (alterErr) => {
+                if (alterErr && !alterErr.message.includes("duplicate column name") && !alterErr.message.includes("duplicate column")) {
+                    console.error("Failed to add settings.sondaIp column:", alterErr.message);
+                }
+            });
         });
         console.log("Connected to SQLite database successfully (WAL enabled).");
     }

@@ -23,7 +23,7 @@ class SettingsController {
             if (!parsed.success) {
                 return res.status(400).json({ error: "Invalid data", details: parsed.error.format() });
             }
-            const { intervaloPing, fallosConsecutivos, recuperacionesConsecutivas, timeout, rutaRespaldos, rutaExportaciones, nombreInstitucion, logo, actualizacionAutomatica } = parsed.data;
+            const { intervaloPing, fallosConsecutivos, recuperacionesConsecutivas, timeout, rutaRespaldos, rutaExportaciones, nombreInstitucion, logo, actualizacionAutomatica, sondaIp } = parsed.data;
             await db_1.query.run(`UPDATE settings SET 
           intervaloPing = ?, 
           fallosConsecutivos = ?, 
@@ -33,7 +33,8 @@ class SettingsController {
           rutaExportaciones = ?, 
           nombreInstitucion = ?, 
           logo = ?, 
-          actualizacionAutomatica = ?
+          actualizacionAutomatica = ?,
+          sondaIp = ?
          WHERE id = 1`, [
                 intervaloPing,
                 fallosConsecutivos,
@@ -43,7 +44,8 @@ class SettingsController {
                 rutaExportaciones,
                 nombreInstitucion,
                 logo,
-                actualizacionAutomatica ? 1 : 0
+                actualizacionAutomatica ? 1 : 0,
+                sondaIp || "11.1.2.254"
             ]);
             await (0, logger_1.logEvent)(logger_1.LogLevel.INFO, "Configuración", "Modificación", "Configuración del sistema actualizada desde la interfaz de usuario.");
             res.json({ message: "Configuration updated successfully" });

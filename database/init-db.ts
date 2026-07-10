@@ -96,8 +96,8 @@ async function init() {
     const stmtSettings = db.prepare(`
       INSERT INTO settings (
         id, intervaloPing, fallosConsecutivos, recuperacionesConsecutivas, timeout,
-        rutaRespaldos, rutaExportaciones, nombreInstitucion, logo, actualizacionAutomatica
-      ) VALUES (1, 30, 10, 3, 1000, ?, ?, 'IMSS OOAD BC', null, 1)
+        rutaRespaldos, rutaExportaciones, nombreInstitucion, logo, actualizacionAutomatica, sondaIp
+      ) VALUES (1, 30, 10, 3, 1000, ?, ?, 'IMSS OOAD BC', null, 1, '11.1.2.254')
     `);
     const backupsDir = path.join(WORKSPACE_DIR, "backups");
     const exportsDir = path.join(WORKSPACE_DIR, "exports");

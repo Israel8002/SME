@@ -149,6 +149,86 @@ app.get("/api/status", async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+// --- Monitor Real-time Activity for PowerShell Console ---
+app.get("/api/monitor/activity", async (req, res) => {
+    try {
+        // 1. Fetch latest 20 pings
+        const pings = await db_1.query.all(`
+      SELECT 
+        h.fechaHora,
+        i.direccionIP,
+        i.descripcion AS ipDesc,
+        u.nombre AS unidadNombre,
+        h.resultado,
+        h.latencia,
+        h.mensajeError
+      FROM ping_history h
+      JOIN unit_ips i ON h.ipId = i.id
+      JOIN units u ON i.unitId = u.id
+      ORDER BY h.id DESC
+      LIMIT 25
+    `);
+        // 2. Fetch latest 10 logs
+        const logs = await db_1.query.all(`
+      SELECT 
+        fechaHora,
+        nivel,
+        modulo,
+        evento,
+        descripcion
+      FROM logs
+      ORDER BY id DESC
+      LIMIT 10
+    `);
+        // 3. Format and merge
+        const items = [];
+        for (const p of pings) {
+            const date = new Date(p.fechaHora);
+            const timeStr = isNaN(date.getTime()) ? p.fechaHora : date.toLocaleTimeString();
+            if (p.resultado === "ONLINE") {
+                items.push({
+                    timestamp: p.fechaHora,
+                    text: `[${timeStr}] PING ${p.direccionIP} (${p.unidadNombre} - ${p.ipDesc}): ONLINE (${p.latencia}ms)`,
+                    color: "text-green-400 font-mono"
+                });
+            }
+            else {
+                items.push({
+                    timestamp: p.fechaHora,
+                    text: `[${timeStr}] PING ${p.direccionIP} (${p.unidadNombre} - ${p.ipDesc}): OFFLINE (${p.mensajeError || 'Sin respuesta'})`,
+                    color: "text-red-400 font-mono font-bold"
+                });
+            }
+        }
+        for (const l of logs) {
+            const date = new Date(l.fechaHora);
+            const timeStr = isNaN(date.getTime()) ? l.fechaHora : date.toLocaleTimeString();
+            let color = "text-gray-300 font-mono";
+            if (l.nivel === "CRITICAL" || l.nivel === "ERROR") {
+                color = "text-red-500 font-mono font-bold";
+            }
+            else if (l.nivel === "WARNING") {
+                color = "text-yellow-400 font-mono";
+            }
+            else if (l.nivel === "INFO") {
+                color = "text-cyan-300 font-mono";
+            }
+            items.push({
+                timestamp: l.fechaHora,
+                text: `[${timeStr}] [${l.nivel}] [${l.modulo}] ${l.evento}: ${l.descripcion}`,
+                color
+            });
+        }
+        // Sort chronologically (oldest to newest)
+        items.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        // Keep the latest 20 items
+        const latestItems = items.slice(-20);
+        res.json(latestItems);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 // Serve Frontend Static Files
 const frontendDistPath = path.resolve(__dirname, "../../frontend/dist");
 app.use(express_1.default.static(frontendDistPath));

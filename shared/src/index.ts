@@ -140,6 +140,7 @@ export interface Settings {
   nombreInstitucion: string;
   logo: string | null;
   actualizacionAutomatica: boolean;
+  sondaIp?: string | null;
 }
 
 export const SettingsSchema = z.object({
@@ -151,5 +152,6 @@ export const SettingsSchema = z.object({
   rutaExportaciones: z.string().min(1),
   nombreInstitucion: z.string().min(1),
   logo: z.string().nullable().default(null),
-  actualizacionAutomatica: z.boolean().default(true)
+  actualizacionAutomatica: z.boolean().default(true),
+  sondaIp: z.string().ip({ version: "v4" }).nullable().optional().or(z.literal("")).default("11.1.2.254")
 });

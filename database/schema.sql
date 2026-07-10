@@ -124,7 +124,8 @@ CREATE TABLE IF NOT EXISTS settings (
     rutaExportaciones TEXT NOT NULL,
     nombreInstitucion TEXT NOT NULL DEFAULT 'IMSS OOAD BC',
     logo TEXT NULL,
-    actualizacionAutomatica INTEGER NOT NULL DEFAULT 1
+    actualizacionAutomatica INTEGER NOT NULL DEFAULT 1,
+    sondaIp TEXT DEFAULT '11.1.2.254'
 );
 
 -- 10. Historial de Importaciones

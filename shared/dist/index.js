@@ -77,5 +77,6 @@ exports.SettingsSchema = zod_1.z.object({
     rutaExportaciones: zod_1.z.string().min(1),
     nombreInstitucion: zod_1.z.string().min(1),
     logo: zod_1.z.string().nullable().default(null),
-    actualizacionAutomatica: zod_1.z.boolean().default(true)
+    actualizacionAutomatica: zod_1.z.boolean().default(true),
+    sondaIp: zod_1.z.string().ip({ version: "v4" }).nullable().optional().or(zod_1.z.literal("")).default("11.1.2.254")
 });

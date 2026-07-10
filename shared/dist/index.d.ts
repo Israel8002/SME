@@ -156,6 +156,7 @@ export interface Settings {
     nombreInstitucion: string;
     logo: string | null;
     actualizacionAutomatica: boolean;
+    sondaIp?: string | null;
 }
 export declare const SettingsSchema: z.ZodObject<{
     intervaloPing: z.ZodNumber;
@@ -167,6 +168,7 @@ export declare const SettingsSchema: z.ZodObject<{
     nombreInstitucion: z.ZodString;
     logo: z.ZodDefault<z.ZodNullable<z.ZodString>>;
     actualizacionAutomatica: z.ZodDefault<z.ZodBoolean>;
+    sondaIp: z.ZodDefault<z.ZodUnion<[z.ZodOptional<z.ZodNullable<z.ZodString>>, z.ZodLiteral<"">]>>;
 }, "strip", z.ZodTypeAny, {
     timeout: number;
     intervaloPing: number;
@@ -177,6 +179,7 @@ export declare const SettingsSchema: z.ZodObject<{
     nombreInstitucion: string;
     logo: string | null;
     actualizacionAutomatica: boolean;
+    sondaIp: string | null;
 }, {
     timeout: number;
     intervaloPing: number;
@@ -187,4 +190,5 @@ export declare const SettingsSchema: z.ZodObject<{
     nombreInstitucion: string;
     logo?: string | null | undefined;
     actualizacionAutomatica?: boolean | undefined;
+    sondaIp?: string | null | undefined;
 }>;

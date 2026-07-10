@@ -11,6 +11,8 @@ WshShell.CurrentDirectory = scriptDir
 nodePath = "node"
 If fso.FileExists(scriptDir & "\bin\node.exe") Then
     nodePath = """" & scriptDir & "\bin\node.exe" & """"
+ElseIf fso.FileExists("C:\Program Files\nodejs\node.exe") Then
+    nodePath = """C:\Program Files\nodejs\node.exe"""
 End If
 
 ' Iniciar el Servidor API REST (sirve el Backend y el Frontend en el puerto 3001)

@@ -32,7 +32,8 @@ export class SettingsController {
         rutaExportaciones,
         nombreInstitucion,
         logo,
-        actualizacionAutomatica
+        actualizacionAutomatica,
+        sondaIp
       } = parsed.data;
 
       await query.run(
@@ -45,7 +46,8 @@ export class SettingsController {
           rutaExportaciones = ?, 
           nombreInstitucion = ?, 
           logo = ?, 
-          actualizacionAutomatica = ?
+          actualizacionAutomatica = ?,
+          sondaIp = ?
          WHERE id = 1`,
         [
           intervaloPing,
@@ -56,7 +58,8 @@ export class SettingsController {
           rutaExportaciones,
           nombreInstitucion,
           logo,
-          actualizacionAutomatica ? 1 : 0
+          actualizacionAutomatica ? 1 : 0,
+          sondaIp || "11.1.2.254"
         ]
       );
 

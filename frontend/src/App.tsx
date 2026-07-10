@@ -64,8 +64,18 @@ export default function App() {
     rutaRespaldos: "",
     rutaExportaciones: "",
     nombreInstitucion: "IMSS OOAD BC",
-    actualizacionAutomatica: true
+    actualizacionAutomatica: true,
+    sondaIp: "11.1.2.254"
   });
+
+  const [activity, setActivity] = useState<any[]>([]);
+  const consoleRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (consoleRef.current) {
+      consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
+    }
+  }, [activity]);
 
   useEffect(() => {
     // Set browser tab title
@@ -77,13 +87,17 @@ export default function App() {
     // Initial fetches
     fetchStatus();
     fetchSettings();
+    fetchActivity();
 
     // Auto-refresh summary data every 10 seconds
     const statusTimer = setInterval(fetchStatus, 10000);
+    // Auto-refresh activity logs every 4 seconds for real-time console
+    const activityTimer = setInterval(fetchActivity, 4000);
 
     return () => {
       clearInterval(clockTimer);
       clearInterval(statusTimer);
+      clearInterval(activityTimer);
     };
   }, []);
 
@@ -108,6 +122,18 @@ export default function App() {
       }
     } catch (err) {
       console.error("Error fetching settings:", err);
+    }
+  };
+
+  const fetchActivity = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/monitor/activity`);
+      if (res.ok) {
+        const data = await res.json();
+        setActivity(data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching activity:", err);
     }
   };
 
@@ -221,6 +247,8 @@ export default function App() {
                 setInitialSelectedTicketId(id);
                 setActiveTab("tickets");
               }}
+              activity={activity}
+              consoleRef={consoleRef}
             />
           )}
           {activeTab === "unidades" && <UnitsPage />}
@@ -249,12 +277,16 @@ function DashboardPage({
   status,
   fetchStatus,
   setActiveTab,
-  openTicketOnTicketsTab
+  openTicketOnTicketsTab,
+  activity,
+  consoleRef
 }: {
   status: any;
   fetchStatus: () => void;
   setActiveTab: (t: string) => void;
   openTicketOnTicketsTab: (id: number) => void;
+  activity: any[];
+  consoleRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const [units, setUnits] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
@@ -309,7 +341,7 @@ function DashboardPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* LEFT COLUMN: ACTIVE TICKETS */}
-        <div className="bg-[#121212] border border-[#262626] rounded flex flex-col h-[400px]">
+        <div className="bg-[#121212] border border-[#262626] rounded flex flex-col h-[520px]">
           <div className="px-4 py-3 border-b border-[#262626] flex items-center justify-between">
             <span className="font-bold text-sm tracking-wide">TICKETS ACTIVOS</span>
             <button onClick={() => setActiveTab("tickets")} className="text-xs text-[#1e88e5] hover:underline">Ver todos</button>
@@ -339,29 +371,29 @@ function DashboardPage({
           </div>
         </div>
 
-        {/* RIGHT COLUMN: RECENT EVENTS MOCK */}
-        <div className="bg-[#121212] border border-[#262626] rounded flex flex-col h-[400px] lg:col-span-2">
+        {/* RIGHT COLUMN: MONITOR DE OPERACIONES */}
+        <div className="bg-[#121212] border border-[#262626] rounded flex flex-col h-[520px] lg:col-span-2">
           <div className="px-4 py-3 border-b border-[#262626] flex items-center justify-between">
             <span className="font-bold text-sm tracking-wide">MONITOR DE OPERACIONES</span>
             <button onClick={loadDashboardData} className="p-1 rounded hover:bg-[#262626] text-gray-400">
               <RefreshCw className="h-4 w-4" />
             </button>
           </div>
-          <div className="p-4 flex-1 flex flex-col justify-between">
+          <div className="p-4 flex-1 flex flex-col gap-3 overflow-hidden">
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[#181818] p-4 rounded text-center">
-                <div className="text-gray-500 text-[11px] uppercase tracking-wider">Enlaces Monitoreados</div>
-                <div className="text-3xl font-bold font-mono text-[#1e88e5] mt-1">{status.monitor?.ipsMonitoreadas || 0}</div>
+              <div className="bg-[#181818] p-3 rounded text-center">
+                <div className="text-gray-500 text-[10px] uppercase tracking-wider">Enlaces Monitoreados</div>
+                <div className="text-2xl font-bold font-mono text-[#1e88e5] mt-0.5">{status.monitor?.ipsMonitoreadas || 0}</div>
               </div>
-              <div className="bg-[#181818] p-4 rounded text-center">
-                <div className="text-gray-500 text-[11px] uppercase tracking-wider">Última Evaluación</div>
-                <div className="text-sm font-semibold text-gray-300 mt-3 font-mono">
+              <div className="bg-[#181818] p-3 rounded text-center">
+                <div className="text-gray-500 text-[10px] uppercase tracking-wider">Última Evaluación</div>
+                <div className="text-sm font-semibold text-gray-300 mt-2 font-mono">
                   {status.monitor?.ultimaEjecucion ? new Date(status.monitor.ultimaEjecucion).toLocaleTimeString() : "No registrado"}
                 </div>
               </div>
             </div>
 
-            <div className="border border-[#262626] p-3 rounded bg-[#0d0d0d] space-y-2 mt-4">
+            <div className="border border-[#262626] p-3 rounded bg-[#0d0d0d] space-y-1.5">
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Métricas de Confiabilidad</div>
               <div className="flex justify-between items-center text-xs">
                 <span>Disponibilidad Promedio (30d):</span>
@@ -370,6 +402,29 @@ function DashboardPage({
               <div className="flex justify-between items-center text-xs">
                 <span>Tiempo de Respuesta Promedio:</span>
                 <span className="font-bold text-blue-400 font-mono">8 ms</span>
+              </div>
+            </div>
+
+            {/* PowerShell-style Console */}
+            <div className="flex-1 bg-[#012456] border border-[#204075] rounded p-3 font-mono text-[10px] overflow-hidden flex flex-col justify-start text-left min-h-[200px]">
+              <div className="text-yellow-400 font-bold">Windows PowerShell</div>
+              <div className="text-gray-400">Copyright (C) Microsoft Corporation. Todos los derechos reservados.</div>
+              <div className="text-cyan-400 mb-1">SME Monitor Service: Activo y en ejecución...</div>
+              
+              <div ref={consoleRef} className="flex-1 overflow-y-auto space-y-1 pr-1 scrollbar-thin scrollbar-thumb-[#1565c0]">
+                {activity.length === 0 ? (
+                  <div className="text-gray-500 italic">Cargando registros de actividad...</div>
+                ) : (
+                  activity.map((act, index) => (
+                    <div key={index} className={act.color || "text-white"}>
+                      {act.text}
+                    </div>
+                  ))
+                )}
+                <div className="text-white mt-1 flex items-center">
+                  <span>PS C:\SME\monitor&gt; </span>
+                  <span className="animate-pulse ml-1 font-bold">_</span>
+                </div>
               </div>
             </div>
           </div>
@@ -2451,6 +2506,7 @@ function SettingsPage({ settings, fetchSettings }: { settings: any; fetchSetting
   const [instName, setInstName] = useState("");
   const [backupsPath, setBackupsPath] = useState("");
   const [exportsPath, setExportsPath] = useState("");
+  const [sondaIp, setSondaIp] = useState("11.1.2.254");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -2462,11 +2518,16 @@ function SettingsPage({ settings, fetchSettings }: { settings: any; fetchSetting
       setInstName(settings.nombreInstitucion);
       setBackupsPath(settings.rutaRespaldos || "");
       setExportsPath(settings.rutaExportaciones || "");
+      setSondaIp(settings.sondaIp || "11.1.2.254");
     }
   }, [settings]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValidIPv4(sondaIp)) {
+      alert("La IP de la Sonda Principal debe tener un formato IPv4 válido.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch(`${API_URL}/api/settings`, {
@@ -2480,7 +2541,8 @@ function SettingsPage({ settings, fetchSettings }: { settings: any; fetchSetting
           rutaRespaldos: backupsPath,
           rutaExportaciones: exportsPath,
           nombreInstitucion: instName,
-          actualizacionAutomatica: true
+          actualizacionAutomatica: true,
+          sondaIp: sondaIp
         })
       });
       if (res.ok) {
@@ -2560,15 +2622,28 @@ function SettingsPage({ settings, fetchSettings }: { settings: any; fetchSetting
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-gray-400 font-semibold">Nombre de la Institución / Unidad</label>
-          <input
-            type="text"
-            value={instName}
-            onChange={(e) => setInstName(e.target.value)}
-            className="w-full bg-[#1c1c1c] border border-[#262626] rounded p-2 text-white focus:outline-none"
-            required
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-gray-400 font-semibold">Nombre de la Institución / Unidad</label>
+            <input
+              type="text"
+              value={instName}
+              onChange={(e) => setInstName(e.target.value)}
+              className="w-full bg-[#1c1c1c] border border-[#262626] rounded p-2 text-white focus:outline-none"
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-gray-400 font-semibold">IP de Sonda Principal</label>
+            <input
+              type="text"
+              value={sondaIp}
+              onChange={(e) => setSondaIp(e.target.value)}
+              className="w-full bg-[#1c1c1c] border border-[#262626] rounded p-2 text-white font-mono focus:outline-none"
+              placeholder="e.g. 11.1.2.254"
+              required
+            />
+          </div>
         </div>
 
         <div className="space-y-1.5">
